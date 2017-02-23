@@ -5,11 +5,14 @@ from collections import Counter
 import sys
 import pickle
 
-#print("Read in ttable", file=sys.stderr)
+print("Read in ttable", file=sys.stderr)
 translation_table = pickle.load( open( sys.argv[1], "rb" ) )
 
-#print("Translate", file=sys.stderr)
+print("Translate", file=sys.stderr)
+found = 0
+unfound = 0
 def translate(word, tag, feats):
+    global found, unfound
     lword = word.lower()
     keys = [(word,tag,feats), (lword,tag,feats),
             (word,tag), (lword,tag),
@@ -21,8 +24,11 @@ def translate(word, tag, feats):
             # print(key, file=sys.stderr)
             break
     if not translation:
-        print('\t'.join(["OOV", tag, word, feats]), file=sys.stderr)
+        # print('\t'.join(["OOV", tag, word, feats]), file=sys.stderr)
         translation = word
+        unfound += 1
+    else:
+        found += 1
     return translation
     
 for line in sys.stdin:
@@ -34,7 +40,7 @@ for line in sys.stdin:
     else:
         print(line)
 
-#print("found:", found, file=sys.stderr)
-#print("unfound:", unfound, file=sys.stderr)
-#print("unfound rate:", (100*unfound/(found+unfound)),"%" , file=sys.stderr)
+print("found:", found, file=sys.stderr)
+print("unfound:", unfound, file=sys.stderr)
+print("OOV rate:", (100*unfound/(found+unfound)),"%" , file=sys.stderr)
 

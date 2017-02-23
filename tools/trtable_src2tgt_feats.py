@@ -28,7 +28,7 @@ for line in sys.stdin:
 # Only keep the most frequent entry
 # In case of ties, sort by jaro_winkler similarity to source
 # In case there are still ties, sort alphabetically
-print("Filtering ttable")
+print("Filtering ttable", file=sys.stderr)
 
 def filter_entry(source, raw_table):
     
@@ -65,6 +65,6 @@ translation_table = {entry : filter_entry(entry, raw_translation_table)
         for entry in raw_translation_table }
 
 # Save ttable
-print("Saving ttable")
+print("Saving ttable", file=sys.stderr)
 pickle.dump(translation_table, open( sys.argv[1], "wb" ) )
 
