@@ -1,0 +1,19 @@
+To use the "Slavic Forest, Norwegian Wood" cross-lingual parsing system,
+you need to fulfill several prerequisities:
+
+You need to have the following software:
+- Bash
+- Python 3
+- Perl
+- Treex
+- UDPipe
+- word2vec
+
+You need to have the following data:
+- UD treebank for the src language
+    - train is sufficient
+- UD treebank for the tgt language
+    - dev/test for evaluation
+    - either the train, or a trained tgt UDPipe tagger
+    - if you want to evaluate the supervised upper bound, you need tgt train
+

@@ -1,0 +1,207 @@
+#!/bin/bash
+#
+# SGE CONFIGURATION
+#
+# !!! Memory limit
+#$ -l h_data=10g
+#$ -l mem_free=10g
+#
+# Run in this directory
+#$ -cwd
+#
+# Use bash
+#$ -S /bin/bash
+#
+# Export environment variables
+#$ -V
+#
+# Logs
+#$ -o /home/rosa/logs
+#$ -e /home/rosa/logs
+# Do not merge stderr with stdout
+#$ -j n
+#
+# 12 threads
+#$ -pe smp 12
+#
+# run in troja
+#$ -q troja-all.q
+
+# Print each command to STDERR before executing (expanded), prefixed by "+ "
+set -o xtrace
+
+renice 10 $$ >&2
+cd ..
+
+# tools
+udpipe=tools/udpipe
+word2vec=tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 12 -binary 0 -iter 15 -min-count 5
+treexp=treex -p --survive --cleanup --queue troja-all.q -m 5G -j 100
+
+# src and tgt langs
+s=SSS
+t=TTT
+
+# feature
+f=Case
+
+# tagger setup
+taggeropts=use_xpostag=0;provide_xpostag=0;guesser_suffix_rules=6;guesser_enrich_dictionary=4
+# remaining default: 1 model, lemmas, upos, feats
+
+# tagger models
+mkdir -p models
+msrc=models/$s-$t.$s-tagger.udpipe
+mtgt=models/$s-$t.$t-tagger.udpipe
+mtgtf=models/$s-$t.$t-tagger-$f.udpipe
+
+# conllu data
+srctrain=treebanks/$s-ud-train.conllu
+tgttrain=treebanks/$t-ud-train.conllu # only for taggers
+srctrans=treebanks/$s-$t.$t-ud-train.trans.$f.conllu
+tgtdtest=treebanks/$t-ud-dev.conllu
+
+# para data:
+# monolingual subparts:
+#   (input)
+# -split (dir with split data)
+# -tok (dir with tokenized data)
+# .tok (joined tokenized data)
+# .vectors (embeddings)
+# bilingual subparts:
+# -align (dir with aligned data)
+# .align (joined aligned data)
+# .pickle (translation table)
+p=para/OpenSubtitles2016.$s-$t
+psrc=$p.$s
+ptgt=$p.$t
+
+# final model
+m=models/$s-$t.trans-$f-w2v.trainonpred.udpipe
+
+# base and upper models
+mdelex=models/$s-$t.delex-$f.trainonpred.udpipe
+msrclex=models/$s-$t.srclex-$f-w2v.trainonpred.udpipe
+msup=models/$s-$t.sup-$f-w2v.trainonpred.udpipe
+
+# split
+mkdir -p $psrc-split/
+mkdir -p $ptgt-split/
+split -a 5 -d -l 10000 $psrc $psrc-split/
+split -a 5 -d -l 10000 $ptgt $ptgt-split/
+
+# tokenize
+mkdir -p $psrc-tok/
+
+$treexp \
+    Read::Sentences from=!$psrc-split/'*' \
+    W2A::Tokenize \
+    A2W::ConcatenateTokens \
+    Write::Sentences to=. path=$psrc-tok/
+
+cat $psrc-tok/* > $psrc.tok
+
+mkdir -p $ptgt-tok/
+
+$treexp \
+    Read::Sentences from=!$ptgt-split/'*' \
+    W2A::Tokenize \
+    A2W::ConcatenateTokens \
+    Write::Sentences to=. path=$ptgt-tok/
+
+cat $ptgt-tok/* > $ptgt.tok
+
+# word2vec
+$word2vec -train $ptgt.tok -output $ptgt.vectors
+
+# train taggers
+cat $srctrain | \
+    $udpipe --train --tokenizer=none --parser=none \
+    --tagger='models=2;'$taggeropts \
+    $msrc
+
+cat $tgttrain | \
+    $udpipe --train --tokenizer=none --parser=none \
+    --tagger='models=2;'$taggeropts \
+    $mtgt
+
+cat $tgttrain | \
+    tools/feats2FEAT.py $f | \
+    $udpipe --train --tokenizer=none --parser=none \
+    --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
+    $mtgtf
+
+# tag and align para
+mkdir -p $p-align/
+
+$treexp \
+    Read::AlignedSentences $s=!$psrc-tok/'*' $t=!$ptgt-tok/'*' \
+    W2A::UDPipe language=$s tokenize=0 parse=0 model=./$msrc \
+    W2A::UDPipe language=$t tokenize=0 parse=0 model=./$mtgt \
+    Util::Eval anode='$anode->set_tag($anode->conll_cpos)' \
+    Align::A::MonolingualGreedy language=$s to_language=$t to_selector= \
+    Write::AttributeSentencesAligned \
+        layer=a language=$s alignment_language=$t \
+        alignment_type=monolingual alignment_is_backwards=0 \
+        attributes='form,tag,conll/feat,aligned->form' \
+        instead_empty= instead_undef= \
+        to=. path=$p-align/
+
+cat $p-align/* > $p.align
+rm -r $psrc-tok/ $ptgt-tok/ $p-align/
+
+# extract translation table
+cat $p.align | \
+    tools/trtable_src2tgt_feats.py $p.pickle
+
+# translate
+cat $srctrain | \
+    tools/translate_conll_src2tgt_feats.py $p.pickle \
+    > $srctrans
+
+# train parser
+cat $srctrans | \
+    tools/feats2FEAT.py $f | \
+    $udpipe --train --tokenizer=none \
+    --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
+    --parser='embedding_form_file='$ptgt'.vectors' \
+    $m
+
+# eval parser
+echo Evaluation of the cross-lingual parser in $m
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $m
+
+# baselines and upper bounds
+cat $srctrain | \
+    tools/feats2FEAT.py $f | \
+    $udpipe --train --tokenizer=none \
+    --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
+    --parser='embedding_form=0' \
+    $mdelex
+cat $srctrain | \
+    tools/feats2FEAT.py $f | \
+    $udpipe --train --tokenizer=none \
+    --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
+    --parser='embedding_form_file='$ptgt'.vectors' \
+    $msrclex
+cat $tgttrain | \
+    tools/feats2FEAT.py $f | \
+    $udpipe --train --tokenizer=none \
+    --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
+    --parser='embedding_form_file='$ptgt'.vectors' \
+    $msup
+echo Evaluation of the delex baseline
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $mdelex
+echo Evaluation of the srclex baseline
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $msrclex
+echo Evaluation of the supervised upper bound
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $msup
+
