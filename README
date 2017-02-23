@@ -5,15 +5,26 @@ You need to have the following software:
 - Bash
 - Python 3
 - Perl
-- Treex
-- UDPipe
-- word2vec
+- Treex (http://ufal.mff.cuni.cz/treex)
+- UDPipe (bundled in tools/)
+- word2vec (bundled in tools/)
 
 You need to have the following data:
 - UD treebank for the src language
     - train is sufficient
 - UD treebank for the tgt language
-    - dev/test for evaluation
-    - either the train, or a trained tgt UDPipe tagger
-    - if you want to evaluate the supervised upper bound, you need tgt train
+    - dev for evaluation
+    - train for training the tagger and the supervised upper bound
+      (you may also provide a trained target tagger and ommit the supervised evaluation)
+- parallel data (separate plaintext file for each of the languages, one
+  sentence per line, with an implicit sentence-level alignment, i.e. sentences
+  on the same line correspond to each other)
+Small smaple data for Czech->Polish are provided (the language labels used are
+"CS" and "PL" not to clash with actual data with "cs" and "pl" labels)
 
+
+Authors: Rudolf Rosa, Daniel Zeman, David Mareček and Zdeněk Žabokrtský
+    <{rosa,zeman,marecek,zabokrtsky}@ufal.mff.cuni.cz>
+    Institute of Formal and Applied Linguistics, Charles University
+Licence: GPL v2
+Year: 2017
