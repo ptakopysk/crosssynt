@@ -3,8 +3,8 @@
 # SGE CONFIGURATION
 #
 # !!! Memory limit
-#$ -l h_data=10g
-#$ -l mem_free=10g
+#$ -l h_data=1g
+#$ -l mem_free=1g
 #
 # Run in this directory
 #$ -cwd
@@ -21,8 +21,8 @@
 # Do not merge stderr with stdout
 #$ -j n
 #
-# 12 threads
-#$ -pe smp 12
+# 1 threads
+#$ -pe smp 1
 #
 # run in troja
 #$ -q troja-all.q
@@ -35,12 +35,22 @@ cd ..
 
 # tools
 udpipe=tools/udpipe
-word2vec=tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 12 -binary 0 -iter 15 -min-count 5
-treexp=treex -p --survive --cleanup --queue troja-all.q -m 5G -j 100
+word2vec="tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 1 -binary 0 -iter 15 -min-count 5"
+treexp="treex -p --survive --cleanup --queue troja-all.q -m 1G -j 2"
 
-# src and tgt langs
-s=SSS
-t=TTT
+# Src and tgt identifiers, e.g. s=cs_cac, t=pl.
+# There are two posible formats for each identifier
+# - just a lowercase ISO language code, e.g. pl
+# - a lowercase ISO language code, followed by an underscore
+# and an alphanumeric treebank subselector, e.g. cs_cac
+s=cs_small
+t=pl_small
+
+# src and tgt ids split into langcode and selector (Treex needs that)
+sl=${s%_*}
+ss=${s#*_}
+tl=${t%_*}
+ts=${t#*_}
 
 # feature
 f=Case
@@ -135,13 +145,13 @@ cat $tgttrain | \
 mkdir -p $p-align/
 
 $treexp \
-    Read::AlignedSentences $s=!$psrc-tok/'*' $t=!$ptgt-tok/'*' \
-    W2A::UDPipe language=$s tokenize=0 parse=0 model=./$msrc \
-    W2A::UDPipe language=$t tokenize=0 parse=0 model=./$mtgt \
+    Read::AlignedSentences $sl'_'$ss=!$psrc-tok/'*' $tl'_'$ts=!$ptgt-tok/'*' \
+    W2A::UDPipe language=$sl selector=$ss tokenize=0 parse=0 model=./$msrc \
+    W2A::UDPipe language=$tl selector=$ts tokenize=0 parse=0 model=./$mtgt \
     Util::Eval anode='$anode->set_tag($anode->conll_cpos)' \
-    Align::A::MonolingualGreedy language=$s to_language=$t to_selector= \
+    Align::A::MonolingualGreedy language=$sl selector=$ss to_language=$tl to_selector=$ts \
     Write::AttributeSentencesAligned \
-        layer=a language=$s alignment_language=$t \
+        layer=a language=$sl selector=$ss alignment_language=$tl alignment_selector=$ts \
         alignment_type=monolingual alignment_is_backwards=0 \
         attributes='form,tag,conll/feat,aligned->form' \
         instead_empty= instead_undef= \
@@ -205,4 +215,4 @@ cat $tgtdtest | \
     $udpipe --accuracy --parse $msup
 
 # cleanup
-rm -r $psrc-split/ $ptgt/split/ $psrc-tok/ $ptgt-tok/ $p-align/
+rm -r $psrc-split/ $ptgt-split/ $psrc-tok/ $ptgt-tok/ $p-align/
