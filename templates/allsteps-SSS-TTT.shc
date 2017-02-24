@@ -48,7 +48,7 @@ f=Case
 
 # tools
 udpipe=tools/udpipe
-word2vec="tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 12 -binary 0 -iter 15 -min-count 5"
+word2vec="tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 10 -binary 0 -iter 15 -min-count 5"
 treexp="treex -p --survive --cleanup --queue troja-all.q -m 5G -j 100"
 
 # tagger setup
@@ -128,12 +128,12 @@ qsub srctagger-$S
 qsub tgttagger-$S
 qsub srctaggerf-$S
 qsub tgttaggerf-$S
-qsub treex-$S     -hold_jid srctagger-$S,tgttagger-$S
-qsub word2vec-$S  -hold_jid treex-$S
-qsub translate-$S -hold_jid treex-$S
-qsub delex-$S     -hold_jid srctaggerf-$S
-qsub srclex-$S    -hold_jid srctaggerf-$S,word2vec-$S
-qsub parser-$S    -hold_jid srctaggerf-$S,word2vec-$S
-qsub sup-$S       -hold_jid tgttaggerf-$S,word2vec-$S
-qsub eval-$S      -hold_jid delex-$S,srclex-$S,sup-$S,parser-$S
+qsub -hold_jid srctagger-$S,tgttagger-$S           treex-$S
+qsub -hold_jid treex-$S                            word2vec-$S
+qsub -hold_jid treex-$S                            translate-$S
+qsub -hold_jid srctaggerf-$S                       delex-$S
+qsub -hold_jid srctaggerf-$S,word2vec-$S           srclex-$S
+qsub -hold_jid srctaggerf-$S,word2vec-$S           parser-$S
+qsub -hold_jid tgttaggerf-$S,word2vec-$S           sup-$S
+qsub -hold_jid delex-$S,srclex-$S,sup-$S,parser-$S eval-$S
 

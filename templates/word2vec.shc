@@ -2,7 +2,7 @@
 #$ -l h_data=1g
 #$ -l mem_free=1g
 #
-# 12 threads
-#$ -pe smp 12
+# 10 threads
+#$ -pe smp 10
 
 $word2vec -train $ptgt.tok -output $ptgt.vectors >&2
