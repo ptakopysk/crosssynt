@@ -100,12 +100,12 @@ msup=models/$s-$t.sup-$f-w2v.trainonpred.udpipe
 #$ -l h_data=1g
 #$ -l mem_free=1g
 
-script=$s-$t.shc
+S=$s-$t.shc
 
 function generate() {
-    sed -n 1,/'^### END_HEADER ###$'/p run/$REQUEST > run/$1-$script
-    echo >> run/$1-$script
-    cat templates/$1.shc >> run/$1-$script
+    sed -n 1,/'^### END_HEADER ###$'/p run/$REQUEST > run/$1-$S
+    echo >> run/$1-$S
+    cat templates/$1.shc >> run/$1-$S
 }
 
 mkdir -p models
@@ -123,5 +123,17 @@ generate srclex
 generate sup
 generate eval
 
-#qsub run/srctagger-script
+cd run/
+qsub srctagger-$S
+qsub tgttagger-$S
+qsub srctaggerf-$S
+qsub tgttaggerf-$S
+qsub treex-$S     -hold_jid srctagger-$S,tgttagger-$S
+qsub word2vec-$S  -hold_jid treex-$S
+qsub translate-$S -hold_jid treex-$S
+qsub delex-$S     -hold_jid srctaggerf-$S
+qsub srclex-$S    -hold_jid srctaggerf-$S,word2vec-$S
+qsub parser-$S    -hold_jid srctaggerf-$S,word2vec-$S
+qsub sup-$S       -hold_jid tgttaggerf-$S,word2vec-$S
+qsub eval-$S      -hold_jid delex-$S,srclex-$S,sup-$S,parser-$S
 
