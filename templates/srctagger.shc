@@ -1,0 +1,8 @@
+# Memory limit
+#$ -l h_data=3g
+#$ -l mem_free=3g
+
+cat $srctrain | \
+    $udpipe --train --tokenizer=none --parser=none \
+    --tagger=$taggeropts \
+    $msrc

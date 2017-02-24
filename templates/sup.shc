@@ -1,0 +1,9 @@
+# Memory limit
+#$ -l h_data=5g
+#$ -l mem_free=5g
+
+cat $tgttrain | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --train --tokenizer=none --tagger=none \
+    --parser='embedding_form_file='$ptgt'.vectors' \
+    $msup

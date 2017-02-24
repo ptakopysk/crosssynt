@@ -1,0 +1,26 @@
+# Memory limit
+#$ -l h_data=1g
+#$ -l mem_free=1g
+
+echo Evaluation of the DELEX baseline
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $mdelex
+echo
+
+echo Evaluation of the SRCLEX baseline
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $msrclex
+echo
+
+echo Evaluation of the SUPervised upper bound
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $msup
+echo
+
+echo Evaluation of the CROSS-lingual parser in $m
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $m

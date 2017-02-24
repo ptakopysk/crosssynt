@@ -1,0 +1,9 @@
+# Memory limit
+#$ -l h_data=5g
+#$ -l mem_free=5g
+
+cat $srctrain | \
+    $udpipe --tag $msrcf | \
+    $udpipe --train --tokenizer=none --tagger=none \
+    --parser='embedding_form=0' \
+    $mdelex
