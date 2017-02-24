@@ -157,13 +157,6 @@ cat $srctrans | \
     --parser='embedding_form_file='$ptgt'.vectors' \
     $m
 
-# eval parser
-log
-echo Evaluation of the CROSS-lingual parser in $m
-cat $tgtdtest | \
-    $udpipe --tag $mtgtf | \
-    $udpipe --accuracy --parse $m
-
 # baselines and upper bounds
 log
 cat $srctrain | \
@@ -187,7 +180,16 @@ cat $tgttrain | \
     --parser='embedding_form_file='$ptgt'.vectors' \
     $msup
 log
+
+# eval parser
+log
+echo Evaluation of the CROSS-lingual parser in $m
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --accuracy --parse $m
 echo
+
+# eval baselines and upper bounds
 echo Evaluation of the DELEX baseline
 cat $tgtdtest | \
     $udpipe --tag $mtgtf | \

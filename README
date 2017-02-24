@@ -10,38 +10,44 @@ You need to have the following software:
 - word2vec (bundled in tools/)
 
 You need to have the following data:
-- UD treebank for the src language
+- UD treebank for the source language
     - train is sufficient
-- UD treebank for the tgt language
+- UD treebank for the target language
     - dev for evaluation
     - train for training the tagger and the supervised upper bound
-      (you may also provide a trained target tagger and ommit the supervised evaluation)
+      (or you may provide a trained target tagger and omit the supervised evaluation)
 - parallel data (separate plaintext file for each of the languages, one
   sentence per line, with an implicit sentence-level alignment, i.e. sentences
   on the same line correspond to each other)
-Small smaple data for Czech->Polish are provided,
-with the identifiers cs_small and pl_small
+Small sample data for Czech and Polish are provided in the sample/ directory.
 
-The scripts to run reside in the run/ directory.
-If you have an SGE cluster, use the the *.shc files,
-otherwise use the *.sh files.
+To run the pipeline on the sample data, run:
+    ./sample.sh
+This will print a lot of debug info to the error output,
+and eventually the evaluation scores to standard output.
 
-To run the pipeline on the sample data, go to the run/ directory and run:
-    ./all-cs_small-pl_small.sh
-Or, if you have an SGE cluster:
-    qsub all-cs_small-pl_small.shc
-
-To create your own setup, go into the run/ directory and run e.g.:
-    ./new.sh cs pl
+Look into the sample.sh script to see what needs to be done to run the
+pipeline on some data:
+- put the necessary treebanks into the treebanks/ directory
+- put the necessary parallel data into the para/ directory
+- create the script to run from the all-SSS-TTT.sh template
+  by substituting SSS for the source language and TTT for the target language
+  (can be done by running ./new.sh [srclang] [tgtlang])
+- go to the run/ directory and run the script  
 
 The source code of the template file is commented, modify it or remove parts
 of it according to your needs.
 
-Of course, you need to make sure that you have the treebank and parallel data.
+If you have an SGE cluster, use the all-SSS-TTT.shc template instead,
+generate the run script with ./new_shc.sh,
+and submit it by going to run/ and calling qsub scriptname.shc
+(you may need to change some of the setting in the shc template).
+
+Of course, you need to get the treebank and parallel data somewhere.
 If you are lucky, you can get these automatically:
-- for treebanks, simply go to the treebanks/ directory and run:
+- for treebanks, simply run:
     ./get_UD-1.4_treebanks.sh
-- for parallel data, go into the para/ directory and run e.g.:
+- for parallel data, try to run e.g.:
     ./try_get_para_SRC_TGT.sh cs pl
 
 Authors: Rudolf Rosa, Daniel Zeman, David Mareček and Zdeněk Žabokrtský
