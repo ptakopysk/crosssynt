@@ -5,6 +5,9 @@
 s=$1
 t=$2
 
+mkdir -p para
+cd para
+
 if wget http://opus.lingfil.uu.se/OpenSubtitles2016/$s-$t.txt.zip
 then
     set -e
