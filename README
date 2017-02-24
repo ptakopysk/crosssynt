@@ -31,13 +31,18 @@ To run the pipeline on the sample data, go to the run/ directory and run:
 Or, if you have an SGE cluster:
     qsub all-cs_small-pl_small.shc
 
-To create your own setup, substitute the SSS and TTT placeholders in the
-all-SSS-TTT.sh template with the languages to use
-(and put the necessary data into the treebanks/ and para/ directories), e.g.:
-    sed -e s/SSS/cs/ -e s/TTT/pl/ all-SSS-TTT.sh > all-cs-pl.sh
+To create your own setup, go into the run/ directory and run e.g.:
+    ./new.sh cs pl
 
 The source code of the template file is commented, modify it or remove parts
 of it according to your needs.
+
+Of course, you need to make sure that you have the treebank and parallel data.
+If you are lucky, you can get these automatically:
+- for treebanks, simply go to the treebanks/ directory and run:
+    ./get_UD-1.4_treebanks.sh
+- for parallel data, go into the para/ directory and run e.g.:
+    ./try_get_para_SRC_TGT.sh cs pl
 
 Authors: Rudolf Rosa, Daniel Zeman, David Mareček and Zdeněk Žabokrtský
     <{rosa,zeman,marecek,zabokrtsky}@ufal.mff.cuni.cz>

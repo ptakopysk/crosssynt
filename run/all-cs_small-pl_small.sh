@@ -1,36 +1,8 @@
 #!/bin/bash
 #
-# SGE CONFIGURATION
-#
-# !!! Memory limit
-#$ -l h_data=10g
-#$ -l mem_free=10g
-#
-# Run in this directory
-#$ -cwd
-#
-# Use bash
-#$ -S /bin/bash
-#
-# Export environment variables
-#$ -V
-#
-# Logs
-#$ -o /home/rosa/logs
-#$ -e /home/rosa/logs
-# Do not merge stderr with stdout
-#$ -j n
-#
-# 12 threads
-#$ -pe smp 12
-#
-# run in troja
-#$ -q troja-all.q
-
 # Print each command to STDERR before executing (expanded), prefixed by "+ "
 set -o xtrace
 
-renice 10 $$ >&2
 cd ..
 
 function log() {
@@ -45,8 +17,8 @@ log
 # - just a lowercase ISO language code, e.g. pl
 # - a lowercase ISO language code, followed by an underscore
 # and an alphanumeric treebank subselector, e.g. cs_cac
-s=SSS
-t=TTT
+s=cs_small
+t=pl_small
 
 # src and tgt ids split into langcode and selector (Treex needs that)
 sl=${s%_*}
@@ -60,7 +32,7 @@ f=Case
 # tools
 udpipe=tools/udpipe
 word2vec="tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 12 -binary 0 -iter 15 -min-count 5"
-treexp="treex -p --survive --cleanup --queue troja-all.q -m 5G -j 100"
+treexp="treex"
 
 # tagger setup
 taggeropts="use_xpostag=0;provide_xpostag=0;guesser_suffix_rules=6;guesser_enrich_dictionary=4"
