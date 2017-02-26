@@ -3,7 +3,7 @@
 #$ -l mem_free=5g
 
 cat $srctrans | \
-    $udpipe --tag $msrcf | \
+    $udpipe --tag $mtgtf | \
     $udpipe --train --tokenizer=none --tagger=none \
     --parser='embedding_form_file='$ptgt'.vectors' \
     $m
