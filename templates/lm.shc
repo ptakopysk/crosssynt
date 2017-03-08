@@ -2,6 +2,10 @@
 #
 # SGE CONFIGURATION
 #
+# !!! Memory limit
+#$ -l h_data=1g
+#$ -l mem_free=1g
+#
 # Run in this directory
 #$ -cwd
 #
@@ -17,15 +21,20 @@
 # Do not merge stderr with stdout
 #$ -j n
 #
+# Avoid pandoras
+#$ -l h=!'pandora*'
+#
 # run in troja
 #$ -q troja-all.q
+#
+# 1 thread
+#$ -pe smp 1
 
 # Print each command to STDERR before executing (expanded), prefixed by "+ "
 set -o xtrace
 
 renice 10 $$ >&2
 cd ..
-
 
 ### SETTINGS ###
 
@@ -34,8 +43,8 @@ cd ..
 # - just a lowercase ISO language code, e.g. pl
 # - a lowercase ISO language code, followed by an underscore
 # and an alphanumeric treebank subselector, e.g. cs_cac
-s=SSS
-t=TTT
+s=sl
+t=hr
 
 # src and tgt ids split into langcode and selector (Treex needs that)
 sl=${s%_*}
@@ -92,48 +101,23 @@ mdelex=models/$s-$t.delex-$f.trainonpred.udpipe
 msrclex=models/$s-$t.srclex-$f-w2v.trainonpred.udpipe
 msup=models/$s-$t.sup-$f-w2v.trainonpred.udpipe
 
+# moses
+
+msrctrue=models/$s-$t.$s-truecaser.model
+mtgttrue=models/$s-$t.$t-truecaser.model
+
+mlma=models/$s-$t.lm.arpa.$t
+mlmb=models/$s-$t.lm.blm.$t
+
 ### END_HEADER ###
-# Everything till the END_HEADER line will be copied to the generated subscripts.
-# Do NOT change the END_HEADER line!!!
+
+sleep 1h
 
 # Memory limit
-#$ -l h_data=1g
-#$ -l mem_free=1g
+#$ -l h_data=30g
+#$ -l mem_free=30g
 
-S=$s-$t.shc
+mosesdecoder/bin/lmplz -o 3 < $p.true.train.$t > $mlma
 
-function generate() {
-    sed -n 1,/'^### END_HEADER ###$'/p run/$REQUEST > run/$1-$S
-    echo >> run/$1-$S
-    cat templates/$1.shc >> run/$1-$S
-}
-
-mkdir -p models
-
-generate srctagger
-generate tgttagger
-generate srctaggerf
-generate tgttaggerf
-generate treex
-generate word2vec
-generate translate
-generate parser
-generate delex
-generate srclex
-generate sup
-generate eval
-
-cd run/
-qsub srctagger-$S
-qsub tgttagger-$S
-qsub srctaggerf-$S
-qsub tgttaggerf-$S
-qsub -hold_jid srctagger-$S,tgttagger-$S           treex-$S
-qsub -hold_jid treex-$S                            word2vec-$S
-qsub -hold_jid treex-$S                            translate-$S
-qsub -hold_jid srctaggerf-$S                       delex-$S
-qsub -hold_jid srctaggerf-$S,word2vec-$S           srclex-$S
-qsub -hold_jid srctaggerf-$S,word2vec-$S           parser-$S
-qsub -hold_jid tgttaggerf-$S,word2vec-$S           sup-$S
-qsub -hold_jid delex-$S,srclex-$S,sup-$S,parser-$S eval-$S
+mosesdecoder/bin/build_binary $mlma $mlmb
 

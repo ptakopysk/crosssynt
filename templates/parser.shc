@@ -7,4 +7,4 @@ cat $srctrans | \
     $udpipe --train --tokenizer=none \
     --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
     --parser='embedding_form_file='$ptgt'.vectors' \
-    $m
+    $mtrans

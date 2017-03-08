@@ -1,6 +1,6 @@
 #!/bin/bash
 
-s=allsteps
+s=allsteps_moses
 
 mkdir -p run
 sed -e s/SSS/$1/ -e s/TTT/$2/ templates/header-SSS-TTT.shc > run/$s-$1-$2.shc

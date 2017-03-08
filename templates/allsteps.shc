@@ -1,0 +1,27 @@
+generate srctagger
+generate tgttagger
+generate srctaggerf
+generate tgttaggerf
+generate treex
+generate word2vec
+generate translate
+generate parser
+generate delex
+generate srclex
+generate sup
+generate eval
+
+cd run/
+qsub srctagger-$S
+qsub tgttagger-$S
+qsub srctaggerf-$S
+qsub tgttaggerf-$S
+qsub -hold_jid srctagger-$S,tgttagger-$S           treex-$S
+qsub -hold_jid treex-$S                            word2vec-$S
+qsub -hold_jid treex-$S                            translate-$S
+qsub -hold_jid srctaggerf-$S                       delex-$S
+qsub -hold_jid srctaggerf-$S,word2vec-$S           srclex-$S
+qsub -hold_jid srctaggerf-$S,word2vec-$S           parser-$S
+qsub -hold_jid tgttaggerf-$S,word2vec-$S           sup-$S
+qsub -hold_jid delex-$S,srclex-$S,sup-$S,parser-$S eval-$S
+
