@@ -86,7 +86,14 @@ psrc=$p.$s
 ptgt=$p.$t
 
 # final model
-mtrans=models/$s-$t.trans-$f-w2v.trainonpred.udpipe
+# tag: trained together with a tagger (i.e. on predicted POS),
+# can be used in two ways:
+# - only the parser, applied to tagged data
+# - both tagger and parser (i.e. tgt xtaggging)
+mtranstag=models/$s-$t.trans-$f-w2v.tagsrc.udpipe
+# xtag: trained on treebank xtagged by a tgt tagger (src xtagging),
+# training without a tagger, to be applied to tgt-tagged data
+mtransxtag=models/$s-$t.trans-$f-w2v.xtagsrc.udpipe
 
 # base and upper models
 mdelex=models/$s-$t.delex-$f.trainonpred.udpipe
@@ -103,7 +110,8 @@ mlmb=models/$s-$t.lm.blm.$t
 # translated conllu data
 srctransmoses=treebanks/$s-$t-ud-train.transmoses.conllu
 # parsing model
-mtransmoses=models/$s-$t.transmoses-$f-w2v.trainonpred.udpipe
+mtransmosestag=models/$s-$t.transmoses-$f-w2v.tagsrc.udpipe
+mtransmosesxtag=models/$s-$t.transmoses-$f-w2v.xtagsrc.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
 
