@@ -41,7 +41,7 @@ cat $tgtdtest | \
 
 echo Evaluation of the MOSES CROSS-lingual parser in $mtransmosestag, tgt xtag
 cat $tgtdtest | \
-    $udpipe --accuracy --tag --parse $mtransmoses
+    $udpipe --accuracy --tag --parse $mtransmosestag
 
 echo Evaluation of the MOSES CROSS-lingual parser in $mtransmosesxtag, src xtag
 cat $tgtdtest | \
