@@ -1,5 +1,5 @@
 # Memory limit
-#$ -l h_data=30g
+#$ -l h_vmem=30g
 #$ -l mem_free=30g
 
 mosesdecoder/bin/lmplz -o 3 < $p.true.train.$t > $mlma

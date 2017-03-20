@@ -1,5 +1,5 @@
 # Memory limit
-#$ -l h_data=5g
+#$ -l h_vmem=5g
 #$ -l mem_free=5g
 
 cat $srctrans | \

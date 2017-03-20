@@ -3,7 +3,7 @@
 # SGE CONFIGURATION
 #
 # !!! Memory limit
-#$ -l h_data=10g
+#$ -l h_vmem=10g
 #$ -l mem_free=10g
 #
 # Run in this directory

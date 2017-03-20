@@ -1,5 +1,5 @@
 # Memory limit
-#$ -l h_data=3g
+#$ -l h_vmem=3g
 #$ -l mem_free=3g
 
 cat $srctrain | \
