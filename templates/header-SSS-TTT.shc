@@ -118,6 +118,11 @@ mtransmosesxtag=models/$s-$t.transmoses-$f-w2v.xtagsrc.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
 
+srcdev=treebanks/$s-ud-dev.conllu
+srcdevtransmoses=treebanks/$s-$t-ud-dev.transmoses.conllu
+
+outmganoxtag=treebanks/$s-$t-ud-dev.mga.noxtag
+
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.
 # Do NOT change the END_HEADER line!!!
