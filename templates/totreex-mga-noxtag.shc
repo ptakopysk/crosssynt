@@ -1,0 +1,15 @@
+# Memory limit
+#$ -l h_data=1g
+#$ -l mem_free=1g
+
+d=$s-$tgtdtest.mga.noxtag
+
+cat $tgtdtest | \
+    $udpipe --tag $mtgtf | \
+    $udpipe --parse $mtranstag \
+    > $d
+
+# TODO translate also to CS or EN
+
+treex Read::AlignedCoNLL conll_format=conllu ${t}_gold=$tgtdtest ${t}_lex=$d Eval::AtreeHighlightEdges language=$t selector=gold Write::Treex to=$d.treex.gz
+
