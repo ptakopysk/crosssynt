@@ -120,6 +120,7 @@ N=10000
 
 srcdev=treebanks/$s-ud-dev.conllu
 srcdevtransmoses=treebanks/$s-$t-ud-dev.transmoses.conllu
+tgtdeventransmoses=treebanks/$t-en-ud-dev.transmoses.conllu
 
 outmganoxtag=treebanks/$s-$t-ud-dev.mga.noxtag
 
