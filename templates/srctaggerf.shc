@@ -1,6 +1,6 @@
 # Memory limit
-#$ -l h_vmem=3g
-#$ -l mem_free=3g
+#$ -l h_vmem=10g
+#$ -l mem_free=10g
 
 cat $srctrain | \
     tools/feats2FEAT.py $f | \
