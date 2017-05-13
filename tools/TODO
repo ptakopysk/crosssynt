@@ -1,0 +1,13 @@
+
+efficiency
+- only look at words with identical prefixes (take first two chars of
+  devowelled deaccented words)
+- only look at words with similar length (+-1 char in deacc devow)
+
+(will not be able to handle some words, such as väčšina, ako, skvalitňování)
+
+precision
+- also look at jw of deacc devow
+- also look at length ration (maybe not necessery if this is already done in
+  filtering)
+
