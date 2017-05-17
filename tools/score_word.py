@@ -8,9 +8,8 @@ from pyjarowinkler import distance
 from unidecode import unidecode
 import re
 from functools import lru_cache
-import math
 
-# usage: ./monotranslate.py src.freqlist tgt.freqlist < src_input > tgt_output
+# usage: ./monotranslate.py src.freqlist tgt.freqlist src_word tgt_word
 
 SMOOTH = 5
 
@@ -22,26 +21,18 @@ with open(sys.argv[1],"rb") as packed:
 with open(sys.argv[2],"rb") as packed:
     tgtlist = msgpack.load(packed, encoding="utf-8", use_list=False)
 
-@lru_cache(maxsize=1024)
 def deacc_dewov(word):
-    deacc = unidecode(word)
-    devow = ""
-    for char in word:
-        if not re.search(vowels, char):
-            devow += char
     dd = re.sub(vowels, "", unidecode(word))
-    return (deacc, devow, dd, dd[:2], len(dd))
+    return (dd, dd[:2], len(dd))
 
-@lru_cache(maxsize=1024)
 def srcwordfreq(word, wordlist):
     return wordfreq(word, srclist)
 
-@lru_cache(maxsize=1024)
 def tgtwordfreq(word, wordlist):
     return wordfreq(word, tgtlist)
 
 def wordfreq(word, wordlist):
-    (deacc, devow, dd, prefix, length) = deacc_dewov(word)
+    (dd, prefix, length) = deacc_dewov(word)
     key = (prefix, length)
     if key in wordlist and word in wordlist[key]:
         count = wordlist[key][word]
@@ -49,8 +40,17 @@ def wordfreq(word, wordlist):
         count = 0
     return (count + SMOOTH) / wordlist[None][None]
 
+def wordcount(word, wordlist):
+    (dd, prefix, length) = deacc_dewov(word)
+    key = (prefix, length)
+    if key in wordlist and word in wordlist[key]:
+        count = wordlist[key][word]
+    else:
+        count = 0
+    return count
+
 def translate(srcword):
-    (src_deacc, src_devow, src_dd, prefix, src_length) = deacc_dewov(srcword)
+    (src_dd, prefix, src_length) = deacc_dewov(srcword)
     tgt_best = "UNKNWON"
     tgt_best_score = 0
     # print("SRC: " + srcword + " count: " + str(src_count) + " freq: " + str(src_freq), file=sys.stderr)
@@ -69,7 +69,6 @@ def translate(srcword):
     return (tgt_best, tgt_best_score)
 
 # Jaro Winkler that can take emtpy words
-@lru_cache(maxsize=1024)
 def jw_safe(srcword, tgtword):
     if srcword == '' or tgtword == '':
         # 1 if both empty
@@ -80,19 +79,25 @@ def jw_safe(srcword, tgtword):
     else:
         return distance.get_jaro_distance(srcword, tgtword)
 
-def simscore(srcword, tgtword):
-    src_freq = wordfreq(srcword, srclist)
-    tgt_freq = wordfreq(tgtword, tgtlist)
-    freq_ratio = math.log(src_freq)/math.log(tgt_freq)
-    freq_sim = min(freq_ratio, 1/freq_ratio)
-    jw_sim = jw_safe(srcword, tgtword)
-    jw_sim_deacc = jw_safe(deacc_dewov(srcword)[0], deacc_dewov(tgtword)[0])
-    jw_sim_devow = jw_safe(deacc_dewov(srcword)[1], deacc_dewov(tgtword)[1])
-    sim = freq_sim * jw_sim * jw_sim_deacc * jw_sim_devow
-    return sim
 
-for line in sys.stdin:
-    line = line.rstrip().lower() # TODO project case
-    (translation, score) = translate(line)
-    print(translation, score)
+srcword = sys.argv[3]
+tgtword = sys.argv[4]
+(src_dd, prefix, src_length) = deacc_dewov(srcword)
+(tgt_dd, prefix, tgt_length) = deacc_dewov(tgtword)
 
+src_count = wordcount(srcword, srclist)
+src_freq = wordfreq(srcword, srclist)
+tgt_count = wordcount(tgtword, tgtlist)
+tgt_freq = wordfreq(tgtword, tgtlist)
+freq_sim = min(src_freq/tgt_freq, tgt_freq/src_freq)
+print("SRC: " + srcword + " dd: " + src_dd, file=sys.stderr)
+print("TGT: " + tgtword + " dd: " + tgt_dd, file=sys.stderr)
+print("count: " + str(src_count) + " freq: " + str(src_freq), file=sys.stderr)
+print("count: " + str(tgt_count) + " freq: " + str(tgt_freq), file=sys.stderr)
+print("freqsim: " + str(freq_sim), file=sys.stderr)
+jw_sim = jw_safe(srcword, tgtword)
+print("jwsim  : " + str(jw_sim), file=sys.stderr)
+jw_sim_dd = jw_safe(deacc_dewov(srcword)[0], deacc_dewov(tgtword)[0])
+print("jwsimdd: " + str(jw_sim_dd), file=sys.stderr)
+sim = freq_sim * jw_sim * jw_sim_dd
+print("sim    : " + str(sim), file=sys.stderr)
