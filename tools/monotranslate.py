@@ -41,7 +41,7 @@ def tgtwordfreq(word, wordlist):
     return wordfreq(word, tgtlist)
 
 def wordfreq(word, wordlist):
-    (deacc, devow, dd, prefix, length) = deacc_dewov(word)
+    (_, _, _, prefix, length) = deacc_dewov(word)
     key = (prefix, length)
     if key in wordlist and word in wordlist[key]:
         count = wordlist[key][word]
@@ -49,10 +49,13 @@ def wordfreq(word, wordlist):
         count = 0
     return (count + SMOOTH) / wordlist[None][None]
 
+@lru_cache(maxsize=65536)
 def translate(srcword):
-    (src_deacc, src_devow, src_dd, prefix, src_length) = deacc_dewov(srcword)
-    tgt_best = "UNKNWON"
-    tgt_best_score = 0
+    (_, _, _, prefix, src_length) = deacc_dewov(srcword)
+    # init with keeping the original word
+    tgt_best = srcword
+    tgt_best_score = simscore(srcword, srcword)
+    print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
     # print("SRC: " + srcword + " count: " + str(src_count) + " freq: " + str(src_freq), file=sys.stderr)
     #if (src_prefix,src_length) in tgtlist and srcword in tgtlist[(src_prefix,tgt_length):
     #    tgt_best = srcword
@@ -63,9 +66,9 @@ def translate(srcword):
                 # print("TGT: " + tgtword + " count: " + str(tgt_count), file=sys.stderr)
                 score = simscore(srcword, tgtword)
                 if score > tgt_best_score:
-                    print("SRC: " + srcword + " TGT: " + tgtword + " " + str(score), file=sys.stderr)
-                    tgt_best_score = score
                     tgt_best = tgtword
+                    tgt_best_score = score
+                    print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
     return (tgt_best, tgt_best_score)
 
 # Jaro Winkler that can take emtpy words
@@ -80,6 +83,7 @@ def jw_safe(srcword, tgtword):
     else:
         return distance.get_jaro_distance(srcword, tgtword)
 
+@lru_cache(maxsize=1024)
 def simscore(srcword, tgtword):
     src_freq = wordfreq(srcword, srclist)
     tgt_freq = wordfreq(tgtword, tgtlist)
@@ -92,7 +96,13 @@ def simscore(srcword, tgtword):
     return sim
 
 for line in sys.stdin:
-    line = line.rstrip().lower() # TODO project case
-    (translation, score) = translate(line)
-    print(translation, score)
+    translated = []
+    for word in line.split():
+        (translation, score) = translate(word.lower())
+        if(word.istitle()):
+            translation = translation.title()
+        if(word.isupper()):
+            translation = translation.upper()
+        translated.append(translation)
+    print(" ".join(translated))
 
