@@ -20,7 +20,7 @@ with open(sys.argv[1], "r") as infile:
         prefix = line_deacc_devow[:2]
         length = len(line_deacc_devow)        
         freqlist[(prefix,length)][line] += 1
-        freqlist[''] += 1
+        freqlist[None][None] += 1
 
 with open(sys.argv[2], "wb") as outfile:
     msgpack.dump(freqlist, outfile)
