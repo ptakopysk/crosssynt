@@ -19,6 +19,9 @@ SMOOTH = 0.1
 # once it is above this
 FREQSIM_THRESH = 0.5
 
+# importance of length match
+LENIMP = 0.2
+
 DEBUG = 1
 
 vowels = r"[aeiouy]"
@@ -129,6 +132,10 @@ def freqsim(srcword, tgtword):
         freq_sim = FREQSIM_THRESH + 0.1*(freq_sim-FREQSIM_THRESH)
     return freq_sim
 
+@lru_cache(maxsize=1024)
+def lensim(srclen, tgtlen):
+    return 1/(1 + LENIMP*abs(srclen-tgtlen))
+
 # early stopping once similarity falls bellow current best
 # (jw is costly)
 @lru_cache(maxsize=1024)
@@ -140,11 +147,26 @@ def simscore(srcword, tgtword, current_best_score=0):
         print("deacc: " + src_dd[0] + " " + tgt_dd[0], file=sys.stderr)
         print("devow: " + src_dd[1] + " " + tgt_dd[1], file=sys.stderr)
         print("deacc devow: " + src_dd[2] + " " + tgt_dd[2], file=sys.stderr)
+    sim = freq_sim
+
+    len_sim = lensim(len(srcword), len(tgtword))
+    if DEBUG >= 2:
+        print("lensim  : " + str(len_sim), file=sys.stderr)
+    sim *= len_sim
+    if sim < current_best_score:
+        return sim
+    
+    dvlen_sim = lensim(len(src_dd[1]), len(tgt_dd[1]))
+    if DEBUG >= 2:
+        print("dvlensim: " + str(dvlen_sim), file=sys.stderr)
+    sim *= dvlen_sim
+    if sim < current_best_score:
+        return sim
     
     jw_sim = jw_safe(srcword, tgtword)
     if DEBUG >= 2:
         print("jwsim  : " + str(jw_sim), file=sys.stderr)
-    sim = freq_sim * jw_sim
+    sim *= jw_sim
     if sim < current_best_score:
         return sim
     
