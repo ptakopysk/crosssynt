@@ -12,67 +12,96 @@ import math
 
 # usage: ./monotranslate.py src.freqlist tgt.freqlist < src_input > tgt_output
 
-SMOOTH = 5
+# add this to counts
+SMOOTH = 0.1
+
+# do not care much for frequency similarity
+# once it is above this
+FREQSIM_THRESH = 0.5
+
+DEBUG = 1
 
 vowels = r"[aeiouy]"
 
-with open(sys.argv[1],"rb") as packed:
-    srclist = msgpack.load(packed, encoding="utf-8", use_list=False)
+srclist = None
+tgtlist = None
 
-with open(sys.argv[2],"rb") as packed:
-    tgtlist = msgpack.load(packed, encoding="utf-8", use_list=False)
+def init(srclistfile, tgtlistfile):
+    global srclist, tgtlist
+    with open(srclistfile,"rb") as packed:
+        srclist = msgpack.load(packed, encoding="utf-8", use_list=False)
+    with open(tgtlistfile,"rb") as packed:
+        tgtlist = msgpack.load(packed, encoding="utf-8", use_list=False)
 
 @lru_cache(maxsize=1024)
+def isvow(char):
+    return re.search(vowels, unidecode(char))
+
+@lru_cache(maxsize=65536)
 def deacc_dewov(word):
     deacc = unidecode(word)
     devow = ""
     for char in word:
-        if not re.search(vowels, char):
+        if not isvow(char):
             devow += char
-    dd = re.sub(vowels, "", unidecode(word))
+    dd = re.sub(vowels, "", deacc)
     return (deacc, devow, dd, dd[:2], len(dd))
 
 @lru_cache(maxsize=1024)
-def srcwordfreq(word, wordlist):
-    return wordfreq(word, srclist)
+def srcwordfreq(word):
+    return (wordcount(word, srclist) + SMOOTH) / srclist[None][None]
 
-@lru_cache(maxsize=1024)
-def tgtwordfreq(word, wordlist):
-    return wordfreq(word, tgtlist)
+@lru_cache(maxsize=65536)
+def tgtwordfreq(word):
+    return (wordcount(word, tgtlist) + SMOOTH) / tgtlist[None][None]
 
-def wordfreq(word, wordlist):
+def wordcount(word, wordlist):
     (_, _, _, prefix, length) = deacc_dewov(word)
     key = (prefix, length)
     if key in wordlist and word in wordlist[key]:
-        count = wordlist[key][word]
+        return wordlist[key][word]
     else:
-        count = 0
-    return (count + SMOOTH) / wordlist[None][None]
+        return 0
+
+@lru_cache(maxsize=65536)
+def sortedtgtdict(prefix, tgt_length):
+    d = tgtlist[(prefix,tgt_length)]
+    return sorted(d, key=d.get, reverse=True)
 
 @lru_cache(maxsize=65536)
 def translate(srcword):
-    (_, _, _, prefix, src_length) = deacc_dewov(srcword)
     # init with keeping the original word
     tgt_best = srcword
     tgt_best_score = simscore(srcword, srcword)
-    print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
-    # print("SRC: " + srcword + " count: " + str(src_count) + " freq: " + str(src_freq), file=sys.stderr)
-    #if (src_prefix,src_length) in tgtlist and srcword in tgtlist[(src_prefix,tgt_length):
-    #    tgt_best = srcword
-    #    tgt_best_score = simscore(srcword, srcword, src_freq, tgtlist[(src_prefix,tgt_length):
+    if DEBUG >= 1:
+        print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
+    (_, _, _, prefix, src_length) = deacc_dewov(srcword)
     for tgt_length in [src_length, src_length-1, src_length+1]:
-        if (prefix,tgt_length) in tgtlist:
-             for tgtword in tgtlist[(prefix,tgt_length)]:
-                # print("TGT: " + tgtword + " count: " + str(tgt_count), file=sys.stderr)
-                score = simscore(srcword, tgtword)
-                if score > tgt_best_score:
-                    tgt_best = tgtword
-                    tgt_best_score = score
+        if (prefix,tgt_length) not in tgtlist:
+            continue
+        # traverse from more frequent to less frequent with early stopping
+        for tgtword in sortedtgtdict(prefix, tgt_length):
+            if DEBUG >= 2:
+                print("TGT: " + tgtword + " count: " + str(wordcount(tgtword, tgtlist)), file=sys.stderr)
+            if freqsim(srcword, tgtword) < tgt_best_score:
+                # no need to go on, cannot be better than current best
+                if tgtwordfreq(tgtword) < srcwordfreq(srcword):
+                    # too infrequent, stop processing this list
+                    break
+                else:
+                    # too frequent, move on in the list
+                    continue
+            # "else" -- passed frequency check
+            score = simscore(srcword, tgtword, tgt_best_score)
+            if score > tgt_best_score:
+                tgt_best = tgtword
+                tgt_best_score = score
+                if DEBUG >= 1:
                     print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
     return (tgt_best, tgt_best_score)
 
 # Jaro Winkler that can take emtpy words
-@lru_cache(maxsize=1024)
+@lru_cache(maxsize=65536)
 def jw_safe(srcword, tgtword):
     if srcword == '' or tgtword == '':
         # 1 if both empty
@@ -80,22 +109,68 @@ def jw_safe(srcword, tgtword):
         # 0.33 if one is length 2
         # ...
         return 1/(len(srcword)+len(tgtword)+1)
+    elif srcword == tgtword:
+        return 1
     else:
         return distance.get_jaro_distance(srcword, tgtword)
 
+@lru_cache(maxsize=16)
+def freqsim(srcword, tgtword):
+    src_freq = srcwordfreq(srcword)
+    tgt_freq = tgtwordfreq(tgtword)
+    freq_sim = 1/(1+abs(math.log(src_freq)-math.log(tgt_freq)))
+    if DEBUG >= 2:
+        print("SRC: " + srcword, file=sys.stderr)
+        print("TGT: " + tgtword, file=sys.stderr)
+        print("count: " + str(wordcount(srcword, srclist)) + " freq: " + str(src_freq), file=sys.stderr)
+        print("count: " + str(wordcount(tgtword, tgtlist)) + " freq: " + str(tgt_freq), file=sys.stderr)
+        print("freqsim: " + str(freq_sim), file=sys.stderr)
+    if freq_sim > FREQSIM_THRESH:
+        freq_sim = FREQSIM_THRESH + 0.1*(freq_sim-FREQSIM_THRESH)
+    return freq_sim
+
+# early stopping once similarity falls bellow current best
+# (jw is costly)
 @lru_cache(maxsize=1024)
-def simscore(srcword, tgtword):
-    src_freq = wordfreq(srcword, srclist)
-    tgt_freq = wordfreq(tgtword, tgtlist)
-    freq_ratio = math.log(src_freq)/math.log(tgt_freq)
-    freq_sim = min(freq_ratio, 1/freq_ratio)
+def simscore(srcword, tgtword, current_best_score=0):
+    freq_sim = freqsim(srcword, tgtword)
+    src_dd = deacc_dewov(srcword)
+    tgt_dd = deacc_dewov(tgtword)
+    if DEBUG >= 2:
+        print("deacc: " + src_dd[0] + " " + tgt_dd[0], file=sys.stderr)
+        print("devow: " + src_dd[1] + " " + tgt_dd[1], file=sys.stderr)
+        print("deacc devow: " + src_dd[2] + " " + tgt_dd[2], file=sys.stderr)
+    
     jw_sim = jw_safe(srcword, tgtword)
-    jw_sim_deacc = jw_safe(deacc_dewov(srcword)[0], deacc_dewov(tgtword)[0])
-    jw_sim_devow = jw_safe(deacc_dewov(srcword)[1], deacc_dewov(tgtword)[1])
-    sim = freq_sim * jw_sim * jw_sim_deacc * jw_sim_devow
+    if DEBUG >= 2:
+        print("jwsim  : " + str(jw_sim), file=sys.stderr)
+    sim = freq_sim * jw_sim
+    if sim < current_best_score:
+        return sim
+    
+    jw_sim_deacc = jw_safe(src_dd[0], tgt_dd[0])
+    if DEBUG >= 2:
+        print("jwsimda: " + str(jw_sim_deacc), file=sys.stderr)
+    sim *= jw_sim_deacc
+    if sim < current_best_score:
+        return sim
+    
+    jw_sim_devow = jw_safe(src_dd[1], tgt_dd[1])
+    if DEBUG >= 2:
+        print("jwsimdv: " + str(jw_sim_devow), file=sys.stderr)
+    sim *= jw_sim_devow
+    if sim < current_best_score:
+        return sim
+    
+    jw_sim_deacc_devow = jw_safe(src_dd[2], tgt_dd[2])
+    if DEBUG >= 2:
+        print("jwsimdd: " + str(jw_sim_deacc_devow), file=sys.stderr)
+    sim *= jw_sim_deacc_devow
+    if DEBUG >= 2:
+        print("sim    : " + str(sim), file=sys.stderr)
     return sim
 
-for line in sys.stdin:
+def translateline(line):
     translated = []
     for word in line.split():
         (translation, score) = translate(word.lower())
@@ -104,5 +179,10 @@ for line in sys.stdin:
         if(word.isupper()):
             translation = translation.upper()
         translated.append(translation)
-    print(" ".join(translated))
+    return " ".join(translated)
+
+if __name__ == "__main__":
+    init(sys.argv[1], sys.argv[2])
+    for line in sys.stdin:
+        print(translateline(line))
 
