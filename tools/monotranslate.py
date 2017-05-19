@@ -207,7 +207,7 @@ def translatetbline(line):
     line = line.rstrip('\n')
     if line != '' and not line.startswith('#'):
         fields = line.split('\t')
-        (fields[1], score) = monotranslate.translatecased(fields[1])
+        (fields[1], score) = translatecased(fields[1])
         return('\t'.join(fields), score, 1)
     else:
         return(line, 0, 0)

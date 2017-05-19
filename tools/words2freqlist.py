@@ -27,8 +27,8 @@ class Freqlist:
     
     def add(self, word):
         word = word.lower()
-        key = line2key(line)
-        self.freqlist[key][line] += 1
+        key = line2key(word)
+        self.freqlist[key][word] += 1
         self.freqlist[None][None] += 1
     
     def addtbline(self, line):

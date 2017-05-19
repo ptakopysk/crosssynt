@@ -1,6 +1,6 @@
 # Memory limit
-#$ -l h_vmem=10g
-#$ -l mem_free=10g
+#$ -l h_vmem=120g
+#$ -l mem_free=120g
 
 for d in $psrc.tok $ptgt.tok
 do
