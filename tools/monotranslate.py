@@ -192,16 +192,16 @@ def simscore(srcword, tgtword, current_best_score=0):
         print("sim    : " + str(sim), file=sys.stderr)
     return sim
 
+def translatecased(word):
+    (translation, score) = translate(word.lower())
+    if(word.istitle()):
+        translation = translation.title()
+    if(word.isupper()):
+        translation = translation.upper()
+    return (translation, score)
+
 def translateline(line):
-    translated = []
-    for word in line.split():
-        (translation, score) = translate(word.lower())
-        if(word.istitle()):
-            translation = translation.title()
-        if(word.isupper()):
-            translation = translation.upper()
-        translated.append(translation)
-    return " ".join(translated)
+    return " ".join([translatecased(word)[0] for word in line.split()])
 
 if __name__ == "__main__":
     init(sys.argv[1], sys.argv[2])
