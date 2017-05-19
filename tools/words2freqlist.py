@@ -20,18 +20,33 @@ def line2key(line):
     line = devow(unidecode(line))
     return (line[:2], len(line))
 
-freqlist=defaultdict(lambda : Counter())
+class Freqlist:
 
-with open(sys.argv[1], "r") as infile:
-    total = 0
-    for line in infile:
-        line = line.rstrip().lower()
+    def __init__(self):
+        self.freqlist = defaultdict(lambda : Counter())
+    
+    def add(self, word):
+        word = word.lower()
         key = line2key(line)
-        freqlist[key][line] += 1
-        total += 1
-    freqlist[None][None] = total
+        self.freqlist[key][line] += 1
+        self.freqlist[None][None] += 1
+    
+    def addtbline(self, line):
+        line = line.rstrip('\n')
+        if line != '' and not line.startswith('#'):
+            fields = line.split('\t')
+            self.add(fields[1])
+    
+    def readin(self, filename):
+        with open(filename, "r") as infile:
+            for line in infile:
+                self.add(line.rstrip())
+    
+    def writeout(self, filename):
+        with open(filename, "wb") as outfile:
+            msgpack.dump(self.freqlist, outfile)
 
-with open(sys.argv[2], "wb") as outfile:
-    msgpack.dump(freqlist, outfile)
-
-
+if __name__ == "__main__":
+    f = Freqlist()
+    f.readin(sys.argv[1])
+    f.writeout(sys.argv[2])

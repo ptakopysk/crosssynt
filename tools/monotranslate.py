@@ -203,6 +203,15 @@ def translatecased(word):
 def translateline(line):
     return " ".join([translatecased(word)[0] for word in line.split()])
 
+def translatetbline(line):
+    line = line.rstrip('\n')
+    if line != '' and not line.startswith('#'):
+        fields = line.split('\t')
+        (fields[1], score) = monotranslate.translatecased(fields[1])
+        return('\t'.join(fields), score, 1)
+    else:
+        return(line, 0, 0)
+
 if __name__ == "__main__":
     init(sys.argv[1], sys.argv[2])
     for line in sys.stdin:
