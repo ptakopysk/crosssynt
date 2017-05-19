@@ -22,6 +22,9 @@ FREQSIM_THRESH = 0.5
 # importance of length match
 LENIMP = 0.2
 
+# no oovs = init with src, oovs = put "__OOV__"
+OOV = 0
+
 DEBUG = 1
 
 vowels = r"[aeiouy]"
@@ -73,9 +76,13 @@ def sortedtgtdict(prefix, tgt_length):
 
 @lru_cache(maxsize=65536)
 def translate(srcword):
-    # init with keeping the original word
-    tgt_best = srcword
-    tgt_best_score = simscore(srcword, srcword)
+    if OOV:
+        tgt_best = "__OOV__"
+        tgt_best_score = 0
+    else:
+        # init with keeping the original word
+        tgt_best = srcword
+        tgt_best_score = simscore(srcword, srcword)
     if DEBUG >= 1:
         print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
     (_, _, _, prefix, src_length) = deacc_dewov(srcword)
