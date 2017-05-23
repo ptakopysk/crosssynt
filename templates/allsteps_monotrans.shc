@@ -1,4 +1,3 @@
-<<<<<<< .working
 generate monotrans_src
 generate monotrans_tgt
 generate srclex_pos_nopretrain
@@ -8,44 +7,15 @@ generate sup_nopos_nopretrain
 generate cross_monotrans_pos_nopretrain
 generate cross_monotrans_nopos_nopretrain
 generate eval_slonlp
-=======
-generate srctagger
-generate tgttagger
-generate srctaggerf
-generate tgttaggerf
-generate treex
-generate word2vec
-generate translate
-generate parser_tag
-generate delex
-generate srclex
-generate sup
-generate moses_prepare
-generate lm
-generate moses_train
-generate moses_tune
-generate moses_translate
-generate parser_transmoses_tag
-generate eval
->>>>>>> .new
 
 cd run/
-qsub srctagger-$S
-qsub tgttagger-$S
-qsub srctaggerf-$S
-qsub tgttaggerf-$S
-qsub -hold_jid srctagger-$S,tgttagger-$S           treex-$S
-qsub -hold_jid treex-$S                            word2vec-$S
-qsub -hold_jid treex-$S                            translate-$S
-qsub -hold_jid srctaggerf-$S                       delex-$S
-qsub -hold_jid srctaggerf-$S,word2vec-$S           srclex-$S
-qsub -hold_jid srctaggerf-$S,word2vec-$S           parser_tag-$S
-qsub -hold_jid tgttaggerf-$S,word2vec-$S           sup-$S
-qsub -hold_jid treex-$S moses_prepare-$S
-qsub -hold_jid moses_prepare-$S lm-$S
-qsub -hold_jid lm-$S moses_train-$S
-qsub -hold_jid moses_train-$S moses_tune-$S
-qsub -hold_jid moses_tune-$S moses_translate-$S
-qsub -hold_jid moses_translate-$S parser_transmoses_tag-$S
-qsub -hold_jid delex-$S,srclex-$S,sup-$S,parser_tag-$S,parser_transmoses_tag-$S eval-$S
+qsub monotrans_src-$S
+qsub monotrans_tgt-$S
+qsub srclex_pos_nopretrain-$S
+qsub srclex_nopos_nopretrain-$S
+qsub sup_pos_nopretrain-$S
+qsub sup_nopos_nopretrain-$S
+qsub -hold_jid monotrans_src-$S      cross_monotrans_pos_nopretrain-$S
+qsub -hold_jid monotrans_src-$S      cross_monotrans_nopos_nopretrain-$S
+qsub -hold_jid monotrans_tgt-$S,srclex_pos_nopretrain-$S,srclex_nopos_nopretrain-$S,sup_pos_nopretrain-$S,sup_nopos_nopretrain-$S,cross_monotrans_pos_nopretrain-$S,cross_monotrans_nopos_nopretrain-$S     eval_slonlp-$S
 
