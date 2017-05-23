@@ -1,0 +1,50 @@
+# Memory limit
+#$ -l h_vmem=1g
+#$ -l mem_free=1g
+
+#echo Evaluation of the DELEX baseline -- TODO with tag projection
+#cat $tgtdtest | \
+#    $udpipe --tag $mtgtf | \
+#    $udpipe --accuracy --parse $mdelex_goldpos
+#echo
+
+echo Evaluation of the SUPervised upper bound, with POS
+cat $tgtdtest | \
+    $udpipe --accuracy --tag --parse $msup_pos_nopretrain
+echo
+
+echo Evaluation of the SUPervised upper bound, dePOSed
+cat $tgtdtest | \
+    $udpipe --accuracy --parse $msup_nopos_nopretrain
+echo
+
+echo Evaluation of the SRCLEX baseline, with POS
+cat $tgtdtest | \
+    $udpipe --accuracy --tag --parse $msrclex_pos_nopretrain
+echo
+
+echo Evaluation of the SRCLEX baseline, dePOSed
+cat $tgtdtest | \
+    $udpipe --accuracy --parse $msrclex_nopos_nopretrain
+echo
+
+echo Evaluation of MonoTrans of tgt, with POS
+cat $tgtdtest_monotrans | \
+    $udpipe --accuracy --tag --parse $msrclex_pos_nopretrain
+echo
+
+echo Evaluation of MonoTrans of tgt, dePOSed
+cat $tgtdtest_monotrans | \
+    $udpipe --accuracy --parse $msrclex_nopos_nopretrain
+echo
+
+echo Evaluation of MonoTrans of src, with POS
+cat $tgtdtest | \
+    $udpipe --accuracy --tag --parse $mcross_monotrans_pos_nopretrain
+echo
+
+echo Evaluation of MonoTrans of src, dePOSed
+cat $tgtdtest | \
+    $udpipe --accuracy --parse $mcross_monotrans_nopos_nopretrain
+echo
+
