@@ -134,6 +134,8 @@ msrclex_pos_nopretrain=models/$s-$t.srclex-pos.udpipe
 msrclex_nopos_nopretrain=models/$s-$t.srclex-nopos.udpipe
 mcross_monotrans_pos_nopretrain=models/$s-$t.monotrans-pos.udpipe
 mcross_monotrans_nopos_nopretrain=models/$s-$t.monotrans-nopos.udpipe
+mdelex_pos=models/$s-$t.delex-pos.udpipe
+mdelex_monotrans_pos=models/$s-$t.delex-monotrans-pos.udpipe
 
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.

@@ -6,6 +6,7 @@ generate sup_pos_nopretrain
 generate sup_nopos_nopretrain
 generate cross_monotrans_pos_nopretrain
 generate cross_monotrans_nopos_nopretrain
+generate delex_monotrans_pos
 generate eval_slonlp
 
 cd run/
@@ -17,5 +18,6 @@ qsub sup_pos_nopretrain-$S
 qsub sup_nopos_nopretrain-$S
 qsub -hold_jid monotrans_src-$S      cross_monotrans_pos_nopretrain-$S
 qsub -hold_jid monotrans_src-$S      cross_monotrans_nopos_nopretrain-$S
-qsub -hold_jid monotrans_tgt-$S,srclex_pos_nopretrain-$S,srclex_nopos_nopretrain-$S,sup_pos_nopretrain-$S,sup_nopos_nopretrain-$S,cross_monotrans_pos_nopretrain-$S,cross_monotrans_nopos_nopretrain-$S     eval_slonlp-$S
+qsub -hold_jid monotrans_src-$S      delex_monotrans_pos-$S
+qsub -hold_jid monotrans_tgt-$S,srclex_pos_nopretrain-$S,srclex_nopos_nopretrain-$S,sup_pos_nopretrain-$S,sup_nopos_nopretrain-$S,cross_monotrans_pos_nopretrain-$S,cross_monotrans_nopos_nopretrain-$S,delex_monotrans_pos-$S    eval_slonlp-$S
 

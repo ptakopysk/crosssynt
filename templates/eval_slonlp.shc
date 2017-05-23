@@ -2,12 +2,6 @@
 #$ -l h_vmem=1g
 #$ -l mem_free=1g
 
-#echo Evaluation of the DELEX baseline -- TODO with tag projection
-#cat $tgtdtest | \
-#    $udpipe --tag $mtgtf | \
-#    $udpipe --accuracy --parse $mdelex_goldpos
-#echo
-
 echo Evaluation of the SUPervised upper bound, with POS
 cat $tgtdtest | \
     $udpipe --accuracy --tag --parse $msup_pos_nopretrain
@@ -48,3 +42,7 @@ cat $tgtdtest | \
     $udpipe --accuracy --parse $mcross_monotrans_nopos_nopretrain
 echo
 
+echo Evaluation of MonoTrans delex
+cat $tgtdtest | \
+    $udpipe --accuracy --tag --parse $mdelex_monotrans_pos
+echo
