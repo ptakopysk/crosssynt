@@ -4,5 +4,5 @@
 
 cat $tgttrain | \
     $udpipe --train --tokenizer=none --tagger=none \
-    --parser='embedding_upos=0;embedding_feats=0;' \
+    --parser='embedding_upostag=0;embedding_feats=0;' \
     $msup_nopos_nopretrain

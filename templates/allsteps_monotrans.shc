@@ -1,5 +1,6 @@
-generate monotrans_src TODO
-generate monotrans_tgt TODO
+<<<<<<< .working
+generate monotrans_src
+generate monotrans_tgt
 generate srclex_pos_nopretrain
 generate srclex_nopos_nopretrain
 generate sup_pos_nopretrain
@@ -7,6 +8,26 @@ generate sup_nopos_nopretrain
 generate cross_monotrans_pos_nopretrain
 generate cross_monotrans_nopos_nopretrain
 generate eval_slonlp
+=======
+generate srctagger
+generate tgttagger
+generate srctaggerf
+generate tgttaggerf
+generate treex
+generate word2vec
+generate translate
+generate parser_tag
+generate delex
+generate srclex
+generate sup
+generate moses_prepare
+generate lm
+generate moses_train
+generate moses_tune
+generate moses_translate
+generate parser_transmoses_tag
+generate eval
+>>>>>>> .new
 
 cd run/
 qsub monotrans_src-$S
