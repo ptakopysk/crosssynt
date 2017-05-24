@@ -25,6 +25,9 @@ LENIMP = 0.2
 # no oovs = init with src, oovs = put "__OOV__"
 OOV = 0
 
+# try all translation options -- don't use lossy pruning (for small datasets)
+TRY_ALL = 0
+
 DEBUG = 1
 
 vowels = r"[aeiouy]"
@@ -85,30 +88,40 @@ def translate(srcword):
         tgt_best_score = simscore(srcword, srcword)
     if DEBUG >= 1:
         print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
-    (_, _, _, prefix, src_length) = deacc_dewov(srcword)
-    for tgt_length in [src_length, src_length-1, src_length+1]:
-        if (prefix,tgt_length) not in tgtlist:
-            continue
-        # traverse from more frequent to less frequent with early stopping
-        for tgtword in sortedtgtdict(prefix, tgt_length):
-            if DEBUG >= 2:
-                print("TGT: " + tgtword + " count: " + str(wordcount(tgtword, tgtlist)), file=sys.stderr)
-            if freqsim(srcword, tgtword) < tgt_best_score:
-                # no need to go on, cannot be better than current best
-                if tgtwordfreq(tgtword) < srcwordfreq(srcword):
-                    # too infrequent, stop processing this list
-                    break
-                else:
-                    # too frequent, move on in the list
-                    continue
-            # "else" -- passed frequency check
-            score = simscore(srcword, tgtword, tgt_best_score)
-            if score > tgt_best_score:
-                tgt_best = tgtword
-                tgt_best_score = score
-                if DEBUG >= 1:
-                    print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
+    if TRY_ALL:
+        for (prefix,tgt_length) in tgtlist:
+            if prefix != None:
+                (tgt_best, tgt_best_score) = translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score)
+    else:
+        (_, _, _, prefix, src_length) = deacc_dewov(srcword)
+        for tgt_length in [src_length, src_length-1, src_length+1]:
+            if (prefix,tgt_length) not in tgtlist:
+                continue
+            (tgt_best, tgt_best_score) = translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score)
     return (tgt_best, tgt_best_score)
+
+def translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score):
+    # traverse from more frequent to less frequent with early stopping
+    for tgtword in sortedtgtdict(prefix, tgt_length):
+        if DEBUG >= 2:
+            print("TGT: " + tgtword + " count: " + str(wordcount(tgtword, tgtlist)), file=sys.stderr)
+        if freqsim(srcword, tgtword) < tgt_best_score:
+            # no need to go on, cannot be better than current best
+            if tgtwordfreq(tgtword) < srcwordfreq(srcword):
+                # too infrequent, stop processing this list
+                break
+            else:
+                # too frequent, move on in the list
+                continue
+        # "else" -- passed frequency check
+        score = simscore(srcword, tgtword, tgt_best_score)
+        if score > tgt_best_score:
+            tgt_best = tgtword
+            tgt_best_score = score
+            if DEBUG >= 1:
+                print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
+    return (tgt_best, tgt_best_score)
+
 
 # Jaro Winkler that can take emtpy words
 @lru_cache(maxsize=65536)

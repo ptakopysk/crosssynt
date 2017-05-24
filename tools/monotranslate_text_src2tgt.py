@@ -7,14 +7,14 @@ import words2freqlist
 import math
 
 srcf = words2freqlist.Freqlist()
-with open(sys.argv[1], "r") as srctb:
-    for line in srctb:
-        srcf.addtbline(line)
+with open(sys.argv[1], "r") as srctext:
+    for line in srctext:
+        srcf.addline(line)
 
 tgtf = words2freqlist.Freqlist()
-with open(sys.argv[2], "r") as tgttb:
-    for line in tgttb:
-        tgtf.addtbline(line)
+with open(sys.argv[2], "r") as tgttext:
+    for line in tgttext:
+        tgtf.addline(line)
 
 TRY_ALL_LIMIT = 10000
 if tgt_count < TRY_ALL_LIMIT:

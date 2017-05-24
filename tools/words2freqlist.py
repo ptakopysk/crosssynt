@@ -37,6 +37,12 @@ class Freqlist:
             fields = line.split('\t')
             self.add(fields[1])
     
+    def addline(self, line):
+        line = line.rstrip('\n')
+        words = line.split(' ')
+        for word in words:
+            self.add(word)
+    
     def readin(self, filename):
         with open(filename, "r") as infile:
             for line in infile:
