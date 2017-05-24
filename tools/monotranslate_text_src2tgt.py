@@ -34,12 +34,13 @@ monotranslate.DEBUG = 0
 monotranslate.srclist = srcf.freqlist
 monotranslate.tgtlist = tgtf.freqlist
 
-sumscore = 0
-countlines = 0
-with open(sys.argv[1], "r") as srctb:
-    for line in srctb:
-        (translation, score, count) = monotranslate.translatetbline(line)
-        sumscore += score
-        countlines += count
+#sumscore = 0
+#countlines = 0
+with open(sys.argv[1], "r") as srctext:
+    for line in srctext:
+        #(translation, score, count) = monotranslate.translatetbline(line)
+        translation = monotranslate.translateline(line)
+        #sumscore += score
+        #countlines += count
         print(translation)
-print("avgscore: " + str(sumscore/countlines), file=sys.stderr)
+#print("avgscore: " + str(sumscore/countlines), file=sys.stderr)
