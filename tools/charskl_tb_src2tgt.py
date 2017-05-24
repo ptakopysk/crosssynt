@@ -18,9 +18,9 @@ def tb2freq(tbfile):
                     freqlist[char] += 1
 
 srcf = tb2freq(sys.argv[1])
-srctotal = srcf.count() # TODO jak se tohle dělá?
+srctotal = len(srcf.elements())
 tgtf = tb2freq(sys.argv[2])
-tgttotal = tgtf.count() # TODO jak se tohle dělá?
+tgttotal = len(tgtf.elements())
 
 kl = 0
 for char in tgtf:
@@ -29,6 +29,6 @@ for char in tgtf:
         src_freq = srcf[char] / srctotal
     else:
         src_freq = 1 / srctotal        
-    kl += tgt_freq * math.log(tgt_freq/src_freq) # TODO je to dobře??? nemá tam bejt třeba ještě abs???
+    kl += tgt_freq * math.log(tgt_freq/src_freq)
 
 print(kl)
