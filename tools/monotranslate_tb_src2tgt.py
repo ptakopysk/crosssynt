@@ -16,15 +16,16 @@ with open(sys.argv[2], "r") as tgttb:
     for line in tgttb:
         tgtf.addtbline(line)
 
-TRY_ALL_LIMIT = 10000
-if tgt_count < TRY_ALL_LIMIT:
-    monotranslate.TRY_ALL = 1
-
 # downscale frequencies so that the distros are similar;
 # in the smaller dataset, the distro is more peaked,
 # so we increase the dataset size to make the distro flatter
 src_count = srcf.freqlist[None][None]
 tgt_count = tgtf.freqlist[None][None]
+
+TRY_ALL_LIMIT = 10000
+if tgt_count < TRY_ALL_LIMIT:
+    monotranslate.TRY_ALL = 1
+
 if src_count > tgt_count:
     tgtf.freqlist[None][None] = tgt_count * math.sqrt(src_count/tgt_count)
 else:

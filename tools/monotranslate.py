@@ -89,9 +89,9 @@ def translate(srcword):
     if DEBUG >= 1:
         print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
     if TRY_ALL:
-        for (prefix,tgt_length) in tgtlist:
-            if prefix != None:
-                (tgt_best, tgt_best_score) = translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score)
+        for key in tgtlist:
+            if key != None:
+                (tgt_best, tgt_best_score) = translate_internal(srcword, key[0], key[1], tgt_best, tgt_best_score)
     else:
         (_, _, _, prefix, src_length) = deacc_dewov(srcword)
         for tgt_length in [src_length, src_length-1, src_length+1]:
