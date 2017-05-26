@@ -108,6 +108,9 @@ def f1(correct, total_hyp, total_ref, max_length, beta=3, smooth=0):
 
 def main(args):
 
+    chrf_total = 0
+    count = 0
+
     for line in args.ref:
       correct = [0]*args.ngram
       total = [0]*args.ngram
@@ -125,12 +128,16 @@ def main(args):
               total_ref[rank] += ngrams_ref[rank][chain]
 
       chrf, precision, recall = f1(correct, total, total_ref, args.ngram, args.beta)
+      chrf_total += chrf
+      count += 1
 
       print('{0:.4f}'.format(chrf))
       #if args.precision:
       #  print('chrPrec: {0:.4f}'.format(precision))
       #if args.recall:
       #  print('chrRec: {0:.4f}'.format(recall))
+
+    print('avg chrf: ' + '{0:.4f}'.format(chrf_total/count), file=sys.stderr)
 
 if __name__ == '__main__':
 

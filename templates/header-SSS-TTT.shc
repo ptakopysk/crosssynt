@@ -126,8 +126,8 @@ outmganoxtag=treebanks/$s-$t-ud-dev.mga.noxtag
 
 
 # slonlp
-srctrain_monotrans=treebanks/$s-ud-train-monotrans.conllu
-tgtdtest_monotrans=treebanks/$t-ud-dev-monotrans.conllu
+srctrain_monotrans=treebanks/$s-ud-train-monotrans-$t.conllu
+tgtdtest_monotrans=treebanks/$t-ud-dev-monotrans-$s.conllu
 msup_pos_nopretrain=models/$s-$t.sup-pos.udpipe
 msup_nopos_nopretrain=models/$s-$t.sup-nopos.udpipe
 msrclex_pos_nopretrain=models/$s-$t.srclex-pos.udpipe
