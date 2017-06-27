@@ -127,6 +127,7 @@ outmganoxtag=treebanks/$s-$t-ud-dev.mga.noxtag
 
 # slonlp
 srctrain_monotrans=treebanks/$s-ud-train-monotrans-$t.conllu
+srctrain_monotrans_paradata=treebanks/$s-ud-train-monotrans-paradata-$t.conllu
 tgtdtest_monotrans=treebanks/$t-ud-dev-monotrans-$s.conllu
 msup_pos_nopretrain=models/$s-$t.sup-pos.udpipe
 msup_nopos_nopretrain=models/$s-$t.sup-nopos.udpipe
@@ -135,6 +136,7 @@ msrclex_nopos_nopretrain=models/$s-$t.srclex-nopos.udpipe
 mcross_monotrans_pos_nopretrain=models/$s-$t.monotrans-pos.udpipe
 mcross_monotrans_nopos_nopretrain=models/$s-$t.monotrans-nopos.udpipe
 mcross_monotrans_tag=models/$s-$t.monotrans-tag.udpipe
+mcross_monotrans_tag_paradata=models/$s-$t.monotrans-paradata-tag.udpipe
 mdelex_pos=models/$s-$t.delex-pos.udpipe
 mdelex_monotrans_pos=models/$s-$t.delex-monotrans-pos.udpipe
 
