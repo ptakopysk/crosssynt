@@ -22,7 +22,7 @@ import math
 # max number of translation options for a word
 ALIGNED_WORDS = 1
 
-DEBUG = 2
+DEBUG = 1
 
 vowels = r"[aeiouy]"
 
