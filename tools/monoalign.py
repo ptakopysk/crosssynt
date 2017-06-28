@@ -22,7 +22,7 @@ import math
 # max number of translation options for a word
 ALIGNED_WORDS = 15
 
-DEBUG = 0
+DEBUG = 2
 
 vowels = r"[aeiouy]"
 
@@ -89,7 +89,7 @@ def relposition(position, length):
         return position/(length-1)
 
 def diagsim(sent_index, srcword_index, tgtword_index):
-    return math.abs(relposition(srcword_index, len(sentences_src[sent_index]))
+    return abs(relposition(srcword_index, len(sentences_src[sent_index]))
             - relposition(tgtword_index, len(sentences_tgt[sent_index])))
 
 
@@ -121,12 +121,17 @@ def simscore(sent_index, srcword_index, tgtword_index):
     sim *= dvlen_sim
 
     dice_sim = dicesim(srcword, tgtword)
+    if DEBUG >= 2:
+        print("dicesim  : " + str(dice_sim), file=sys.stderr)
     sim *= dice_sim
 
-    dice_sim_deacc_devow = dicesim(src_dd[2], tgt_dd[2])
-    sim *= dice_sim_deacc_devow
+    # TODO have to keep separate counts for that
+    # dice_sim_deacc_devow = dicesim(src_dd[2], tgt_dd[2])
+    # sim *= dice_sim_deacc_devow
 
     diag_sim = diagsim(sent_index, srcword_index, tgtword_index)
+    if DEBUG >= 2:
+        print("diagsim  : " + str(diag_sim), file=sys.stderr)
     sim *= diag_sim
 
     jw_sim = jw_safe(srcword, tgtword)
@@ -172,8 +177,8 @@ def align(sent_index):
                     sent_index, srcword_index, tgtword_index)
 
     # find alignment
-    alignment_src2tgt[sent_index] = [(-1,0) for x in range(len(sent_src))]
-    alignment_tgt2src[sent_index] = [(-1,0) for x in range(len(sent_tgt))]
+    alignment_src2tgt.append([(-1,0) for x in range(len(sent_src))])
+    alignment_tgt2src.append([(-1,0) for x in range(len(sent_tgt))])
     
     for (srcword_index, tgtword_index) in sorted(matrix, key=matrix.get, reverse=True):
         if (alignment_src2tgt[sent_index][srcword_index] == (-1,0)
@@ -185,14 +190,14 @@ def align(sent_index):
 
 def print_alignment(sent_index):
     print(sent_index)
-    print(len(sentences_src[sent_index]) + " "
+    print(str(len(sentences_src[sent_index])) + " "
         + " ".join(sentences_src[sent_index]) + "  # "
-        + " ".join([x+1 for (x,_) in alignment_src2tgt[sent_index]]) + "  # "
-        + " ".join([x for (_,x) in alignment_src2tgt[sent_index]]))
-    print(len(sentences_tgt[sent_index]) + " "
+        + " ".join([str(x+1) for (x,_) in alignment_src2tgt[sent_index]]) + "  # "
+        + " ".join([str(x) for (_,x) in alignment_src2tgt[sent_index]]))
+    print(str(len(sentences_tgt[sent_index])) + " "
         + " ".join(sentences_tgt[sent_index]) + "  # "
-        + " ".join([x+1 for (x,_) in alignment_tgt2src[sent_index]]) + "  # "
-        + " ".join([x for (_,x) in alignment_tgt2src[sent_index]]))
+        + " ".join([str(x+1) for (x,_) in alignment_tgt2src[sent_index]]) + "  # "
+        + " ".join([str(x) for (_,x) in alignment_tgt2src[sent_index]]))
 
 # Produces Moses lex format
 # Moses phrase table format:
@@ -203,9 +208,8 @@ def save_trtable(trtable_file):
     with open(trtable_file, "w") as trtable:
         for srcword in alignment_word:
             total = sum(alignment_word[srcword].values())
-            for tgtword in alignment_word[srcword].most_common(ALIGNED_WORDS):
-                score = alignment_word[srcword][tgtword] / total
-                print(" ".join([srcword, tgtword, score]), file=trtable)
+            for (tgtword,count) in alignment_word[srcword].most_common(ALIGNED_WORDS):
+                print(" ".join([srcword, tgtword, str(count/total)]), file=trtable)
 
 if __name__ == "__main__":
     init(sys.argv[1], sys.argv[2])
