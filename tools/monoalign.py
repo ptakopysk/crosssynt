@@ -29,24 +29,19 @@ vowels = r"[aeiouy]"
 counts_src = Counter()
 counts_tgt = Counter()
 cooccurences = Counter()
-sentences_src = list()
-sentences_tgt = list()
 
 def init(srcfile, tgtfile):
-    global cooccurences, sentences_src, sentences_tgt
+    global cooccurences, counts_src, counts_tgt
     with open(srcfile, "r") as srcfile_f, open(tgtfile, "r") as tgtfile_f:
-            srclines = srcfile_f.readlines()
-            tgtlines = tgtfile_f.readlines()
-            assert len(srclines) == len(tgtlines), "Para data must be same length"
-            for sent_index in range(len(srclines)):
-                sentences_src.append(srclines[sent_index].split())
-                sentences_tgt.append(tgtlines[sent_index].split())
-                for src_word in sentences_src[sent_index]:
-                    counts_src[src_word] += 1
-                    for tgt_word in sentences_tgt[sent_index]:
-                        cooccurences[(src_word, tgt_word)] += 1
-                for tgt_word in sentences_tgt[sent_index]:
-                    counts_tgt[tgt_word] += 1
+        for srcsent, tgtsent in zip(srcfile_f, tgtfile_f):
+            srctokens = srcsent.split()
+            tgttokens = tgtsent.split()
+            for src_word in srctokens:
+                counts_src[src_word] += 1
+                for tgt_word in tgttokens:
+                    cooccurences[(src_word, tgt_word)] += 1
+            for tgt_word in tgttokens:
+                counts_tgt[tgt_word] += 1
                         
 @lru_cache(maxsize=1024)
 def isvow(char):
@@ -88,9 +83,9 @@ def relposition(position, length):
     else:
         return position/(length-1)
 
-def diagsim(sent_index, srcword_index, tgtword_index):
-    return 1-abs(relposition(srcword_index, len(sentences_src[sent_index]))
-            - relposition(tgtword_index, len(sentences_tgt[sent_index])))
+def diagsim(srclen, tgtlen, srcword_index, tgtword_index):
+    return 1-abs(relposition(srcword_index, srclen)
+            - relposition(tgtword_index, tgtlen))
 
 
 def dicesim(srcword, tgtword):
@@ -98,9 +93,9 @@ def dicesim(srcword, tgtword):
             counts_src[srcword] + counts_tgt[tgtword])
 
 # @lru_cache(maxsize=1024)
-def simscore(sent_index, srcword_index, tgtword_index):
-    srcword = sentences_src[sent_index][srcword_index]
-    tgtword = sentences_tgt[sent_index][tgtword_index]
+def simscore(srctokens, tgttokens, srcword_index, tgtword_index):
+    srcword = srctokens[srcword_index]
+    tgtword = tgttokens[tgtword_index]
     src_dd = deacc_dewov(srcword)
     tgt_dd = deacc_dewov(tgtword)
     if DEBUG >= 2:
@@ -110,6 +105,11 @@ def simscore(sent_index, srcword_index, tgtword_index):
         print("deacc devow: " + src_dd[2] + " " + tgt_dd[2], file=sys.stderr)
 
     sim = 1
+
+    diag_sim = diagsim(len(srctokens), len(tgttokens), srcword_index, tgtword_index)
+    if DEBUG >= 2:
+        print("diagsim  : " + str(diag_sim), file=sys.stderr)
+    sim *= diag_sim
 
     len_sim = lensim(len(srcword), len(tgtword))
     if DEBUG >= 2:
@@ -129,11 +129,6 @@ def simscore(sent_index, srcword_index, tgtword_index):
     # TODO have to keep separate counts for that
     # dice_sim_deacc_devow = dicesim(src_dd[2], tgt_dd[2])
     # sim *= dice_sim_deacc_devow
-
-    diag_sim = diagsim(sent_index, srcword_index, tgtword_index)
-    if DEBUG >= 2:
-        print("diagsim  : " + str(diag_sim), file=sys.stderr)
-    sim *= diag_sim
 
     jw_sim = jw_safe(srcword, tgtword)
     if DEBUG >= 2:
@@ -160,45 +155,53 @@ def simscore(sent_index, srcword_index, tgtword_index):
     return sim
 
 
-alignment_src2tgt = list()
-alignment_tgt2src = list()
 alignment_word = defaultdict(Counter)
 
-def align(sent_index):
-    global alignment_src2tgt, alignment_tgt2src
-
-    sent_src = sentences_src[sent_index]
-    sent_tgt = sentences_tgt[sent_index]
+def align(srctokens, tgttokens):
+    global alignment_word
 
     # compute alignment scores
     matrix = dict()
-    for srcword_index in range(len(sent_src)):
-        for tgtword_index in range(len(sent_tgt)):
+    for srcword_index in range(len(srctokens)):
+        for tgtword_index in range(len(tgttokens)):
             matrix[(srcword_index, tgtword_index)] = simscore(
-                    sent_index, srcword_index, tgtword_index)
+                    srctokens, tgttokens, srcword_index, tgtword_index)
 
     # find alignment
-    alignment_src2tgt.append([(-1,0) for x in range(len(sent_src))])
-    alignment_tgt2src.append([(-1,0) for x in range(len(sent_tgt))])
-    
+    alignment = [ [(-1,0) for x in range(len(srctokens))],
+                  [(-1,0) for x in range(len(tgttokens))] ]
     for (srcword_index, tgtword_index) in sorted(matrix, key=matrix.get, reverse=True):
-        if (alignment_src2tgt[sent_index][srcword_index] == (-1,0)
-                and alignment_tgt2src[sent_index][tgtword_index] == (-1,0)):
+        if (alignment[0][srcword_index] == (-1,0)
+                and alignment[1][tgtword_index] == (-1,0)):
             score = matrix[(srcword_index,tgtword_index)]
-            alignment_src2tgt[sent_index][srcword_index] = (tgtword_index,score)
-            alignment_tgt2src[sent_index][tgtword_index] = (srcword_index,score)
-            alignment_word[sent_src[srcword_index]][sent_tgt[tgtword_index]] += 1
+            alignment[0][srcword_index] = (tgtword_index,score)
+            alignment[1][tgtword_index] = (srcword_index,score)
+            alignment_word[srctokens[srcword_index]][tgttokens[tgtword_index]] += 1
 
-def print_alignment(sent_index):
+    return alignment
+
+def print_alignment(sent_index, srctokens, tgttokens, alignment):
     print(sent_index)
-    print(str(len(sentences_src[sent_index])) + " "
-        + " ".join(sentences_src[sent_index]) + "  # "
-        + " ".join([str(x+1) for (x,_) in alignment_src2tgt[sent_index]]) + "  # "
-        + " ".join([str(x) for (_,x) in alignment_src2tgt[sent_index]]))
-    print(str(len(sentences_tgt[sent_index])) + " "
-        + " ".join(sentences_tgt[sent_index]) + "  # "
-        + " ".join([str(x+1) for (x,_) in alignment_tgt2src[sent_index]]) + "  # "
-        + " ".join([str(x) for (_,x) in alignment_tgt2src[sent_index]]))
+    print(str(len(srctokens)) + " "
+        + " ".join(srctokens) + "  # "
+        + " ".join([str(x+1) for (x,_) in alignment[0]]) + "  # "
+        + " ".join([str(x)   for (_,x) in alignment[0]]))
+    print(str(len(tgttokens)) + " "
+        + " ".join(tgttokens) + "  # "
+        + " ".join([str(x+1) for (x,_) in alignment[1]]) + "  # "
+        + " ".join([str(x)   for (_,x) in alignment[1]]))
+
+def align_files(srcfile, tgtfile):
+    sent_index = 0
+    with open(srcfile, "r") as srcfile_f, open(tgtfile, "r") as tgtfile_f:
+        for srcsent, tgtsent in zip(srcfile_f, tgtfile_f):
+            srctokens = srcsent.split()
+            tgttokens = tgtsent.split()
+            alignment = align(srctokens, tgttokens)
+            print_alignment(sent_index, srctokens, tgttokens, alignment)
+            if DEBUG >= 1:
+                print("aligned sent " + str(sent_index), file=sys.stderr)
+            sent_index += 1
 
 # Produces Moses lex format
 # Moses phrase table format:
@@ -219,11 +222,7 @@ if __name__ == "__main__":
     
     if DEBUG >= 1:
         print("ALIGNING...", file=sys.stderr)
-    for sent_index in range(len(sentences_src)):
-        align(sent_index)
-        print_alignment(sent_index)
-        if DEBUG >= 1:
-            print("aligned sent " + str(sent_index), file=sys.stderr)
+    align_files(sys.argv[1], sys.argv[2])
     
     if DEBUG >= 1:
         print("SAVING...", file=sys.stderr)
