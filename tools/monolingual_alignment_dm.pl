@@ -68,7 +68,7 @@ my $ALIGNED_WORDS = 1;
 {
     open my $file, '>:utf8', $ARGV[2];
     foreach my $w0 (keys %alignment_word) {
-        my @sorted = sort {$alignment_word{$w0}{$a} <=> $alignment_word{$w0}{$b}}
+        my @sorted = sort {$alignment_word{$w0}{$b} <=> $alignment_word{$w0}{$a}}
             keys $alignment_word{$w0};
         my $total = 0;
         foreach my $w1 (@sorted) {
