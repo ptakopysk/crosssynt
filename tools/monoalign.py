@@ -11,26 +11,30 @@ import re
 from functools import lru_cache
 import math
 
-# usage: ./monoalign.py src_sentences tgt_sentences trtable,pickle > alignment.slign
+# usage: ./monoalign.py src_sentences tgt_sentences lextable,txt > # alignment.align
 
 # add this to counts
-SMOOTH = 0.1
+# SMOOTH = 0.1
 
 # importance of length match
-LENIMP = 0.2
+# LENIMP = 0.2
 
-DEBUG = 1
+# max number of translation options for a word
+ALIGNED_WORDS = 15
+
+DEBUG = 0
 
 vowels = r"[aeiouy]"
 
+counts_src = Counter()
+counts_tgt = Counter()
 cooccurences = Counter()
-sentences_src = ()
-sentences_tgt = ()
+sentences_src = list()
+sentences_tgt = list()
 
 def init(srcfile, tgtfile):
     global cooccurences, sentences_src, sentences_tgt
-    with open(srcfile, "r") as srcfile_f:
-        with open(tgtfile, "r") as tgtfile_f:
+    with open(srcfile, "r") as srcfile_f, open(tgtfile, "r") as tgtfile_f:
             srclines = srcfile_f.readlines()
             tgtlines = tgtfile_f.readlines()
             assert len(srclines) == len(tgtlines), "Para data must be same length"
@@ -38,8 +42,11 @@ def init(srcfile, tgtfile):
                 sentences_src.append(srclines[sent_index].split())
                 sentences_tgt.append(tgtlines[sent_index].split())
                 for src_word in sentences_src[sent_index]:
-                    for tgt_word in sentences_tgt[sent_index]
+                    counts_src[src_word] += 1
+                    for tgt_word in sentences_tgt[sent_index]:
                         cooccurences[(src_word, tgt_word)] += 1
+                for tgt_word in sentences_tgt[sent_index]:
+                    counts_tgt[tgt_word] += 1
                         
 @lru_cache(maxsize=1024)
 def isvow(char):
@@ -71,22 +78,36 @@ def jw_safe(srcword, tgtword):
 
 @lru_cache(maxsize=1024)
 def lensim(srclen, tgtlen):
-    return 1/(1 + LENIMP*abs(srclen-tgtlen))
+    # return 1/(1 + LENIMP*abs(srclen-tgtlen))
+    return 1/(1 + abs(srclen-tgtlen))
+
+@lru_cache(maxsize=1024)
+def relposition(position, length):
+    if length == 1:
+        return 0.5
+    else:
+        return position/(length-1)
+
+def diagsim(sent_index, srcword_index, tgtword_index):
+    return math.abs(relposition(srcword_index, len(sentences_src[sent_index]))
+            - relposition(tgtword_index, len(sentences_tgt[sent_index])))
 
 
 def dicesim(srcword, tgtword):
-    # TODO return dice similarity
+    return 2*cooccurences[(srcword,tgtword)] / (
+            counts_src[srcword] + counts_tgt[tgtword])
 
-# early stopping once similarity falls bellow current best
-# (jw is costly)
-@lru_cache(maxsize=1024)
-def simscore(srcword, tgtword):
+# @lru_cache(maxsize=1024)
+def simscore(sent_index, srcword_index, tgtword_index):
+    srcword = sentences_src[sent_index][srcword_index]
+    tgtword = sentences_tgt[sent_index][tgtword_index]
     src_dd = deacc_dewov(srcword)
     tgt_dd = deacc_dewov(tgtword)
     if DEBUG >= 2:
         print("deacc: " + src_dd[0] + " " + tgt_dd[0], file=sys.stderr)
         print("devow: " + src_dd[1] + " " + tgt_dd[1], file=sys.stderr)
         print("deacc devow: " + src_dd[2] + " " + tgt_dd[2], file=sys.stderr)
+
     sim = 1
 
     len_sim = lensim(len(srcword), len(tgtword))
@@ -104,7 +125,10 @@ def simscore(srcword, tgtword):
 
     dice_sim_deacc_devow = dicesim(src_dd[2], tgt_dd[2])
     sim *= dice_sim_deacc_devow
-    
+
+    diag_sim = diagsim(sent_index, srcword_index, tgtword_index)
+    sim *= diag_sim
+
     jw_sim = jw_safe(srcword, tgtword)
     if DEBUG >= 2:
         print("jwsim  : " + str(jw_sim), file=sys.stderr)
@@ -129,8 +153,66 @@ def simscore(srcword, tgtword):
         print("sim    : " + str(sim), file=sys.stderr)
     return sim
 
+
+alignment_src2tgt = list()
+alignment_tgt2src = list()
+alignment_word = defaultdict(Counter)
+
+def align(sent_index):
+    global alignment_src2tgt, alignment_tgt2src
+
+    sent_src = sentences_src[sent_index]
+    sent_tgt = sentences_tgt[sent_index]
+
+    # compute alignment scores
+    matrix = dict()
+    for srcword_index in range(len(sent_src)):
+        for tgtword_index in range(len(sent_tgt)):
+            matrix[(srcword_index, tgtword_index)] = simscore(
+                    sent_index, srcword_index, tgtword_index)
+
+    # find alignment
+    alignment_src2tgt[sent_index] = [(-1,0) for x in range(len(sent_src))]
+    alignment_tgt2src[sent_index] = [(-1,0) for x in range(len(sent_tgt))]
+    
+    for (srcword_index, tgtword_index) in sorted(matrix, key=matrix.get, reverse=True):
+        if (alignment_src2tgt[sent_index][srcword_index] == (-1,0)
+                and alignment_tgt2src[sent_index][tgtword_index] == (-1,0)):
+            score = matrix[(srcword_index,tgtword_index)]
+            alignment_src2tgt[sent_index][srcword_index] = (tgtword_index,score)
+            alignment_tgt2src[sent_index][tgtword_index] = (srcword_index,score)
+            alignment_word[sent_src[srcword_index]][sent_tgt[tgtword_index]] += 1
+
+def print_alignment(sent_index):
+    print(sent_index)
+    print(len(sentences_src[sent_index]) + " "
+        + " ".join(sentences_src[sent_index]) + "  # "
+        + " ".join([x+1 for (x,_) in alignment_src2tgt[sent_index]]) + "  # "
+        + " ".join([x for (_,x) in alignment_src2tgt[sent_index]]))
+    print(len(sentences_tgt[sent_index]) + " "
+        + " ".join(sentences_tgt[sent_index]) + "  # "
+        + " ".join([x+1 for (x,_) in alignment_tgt2src[sent_index]]) + "  # "
+        + " ".join([x for (_,x) in alignment_tgt2src[sent_index]]))
+
+# Produces Moses lex format
+# Moses phrase table format:
+# Ach ||| pravdepodobne ||| 0.000245278 0.0002059 0.000262536 0.0001978 ||| 0-0 ||| 4077 3809 1 ||| |||
+# Moses lex table format:
+# šľachetného šlechetného 0.4285714
+def save_trtable(trtable_file):
+    with open(trtable_file, "w") as trtable:
+        for srcword in alignment_word:
+            total = sum(alignment_word[srcword].values())
+            for tgtword in alignment_word[srcword].most_common(ALIGNED_WORDS):
+                score = alignment_word[srcword][tgtword] / total
+                print(" ".join([srcword, tgtword, score]), file=trtable)
+
 if __name__ == "__main__":
     init(sys.argv[1], sys.argv[2])
-    save_trtable(sys.argv[3]) # TODO
-    # TODO print alignment
+    for sent_index in range(len(sentences_src)):
+        align(sent_index)
+        print_alignment(sent_index)
+        if DEBUG >= 1:
+            print("aligned sent " + str(sent_index), file=sys.stderr)
+    save_trtable(sys.argv[3])
 
