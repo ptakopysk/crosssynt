@@ -89,7 +89,7 @@ def relposition(position, length):
         return position/(length-1)
 
 def diagsim(sent_index, srcword_index, tgtword_index):
-    return abs(relposition(srcword_index, len(sentences_src[sent_index]))
+    return 1-abs(relposition(srcword_index, len(sentences_src[sent_index]))
             - relposition(tgtword_index, len(sentences_tgt[sent_index])))
 
 
@@ -104,6 +104,7 @@ def simscore(sent_index, srcword_index, tgtword_index):
     src_dd = deacc_dewov(srcword)
     tgt_dd = deacc_dewov(tgtword)
     if DEBUG >= 2:
+        print("WORDS: " + srcword + " " + tgtword, file=sys.stderr)
         print("deacc: " + src_dd[0] + " " + tgt_dd[0], file=sys.stderr)
         print("devow: " + src_dd[1] + " " + tgt_dd[1], file=sys.stderr)
         print("deacc devow: " + src_dd[2] + " " + tgt_dd[2], file=sys.stderr)
