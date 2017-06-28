@@ -22,7 +22,7 @@ import math
 # max number of translation options for a word
 ALIGNED_WORDS = 1
 
-DEBUG = 1
+DEBUG = 2
 
 vowels = r"[aeiouy]"
 
@@ -58,6 +58,7 @@ def deacc_dewov(word):
     return (deacc, devow, dd, dd[:2], len(dd))
 
 # Jaro Winkler that can take emtpy words
+SMOOTH=0.01
 @lru_cache(maxsize=65536)
 def jw_safe(srcword, tgtword):
     if srcword == '' or tgtword == '':
@@ -69,7 +70,11 @@ def jw_safe(srcword, tgtword):
     elif srcword == tgtword:
         return 1
     else:
-        return distance.get_jaro_distance(srcword, tgtword)
+        dist = distance.get_jaro_distance(srcword, tgtword)
+        if dist > 0:
+            return dist
+        else:
+            return SMOOTH
 
 @lru_cache(maxsize=1024)
 def lensim(srclen, tgtlen):
