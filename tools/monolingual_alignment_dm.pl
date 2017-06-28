@@ -19,6 +19,7 @@ foreach my $f (0, 1) {
     while (<TEXT>) {
         chomp;
         my @items = split / /, $_;
+        $form[$sent_count][$f] = [];
         foreach my $item (@items) {
             push $form[$sent_count][$f], $item;
         }
@@ -26,6 +27,8 @@ foreach my $f (0, 1) {
     }
     close TEXT;
 }
+
+my %alignment_word;
 
 foreach my $s (0 .. $#form) {
     my @alignment;
@@ -52,51 +55,32 @@ foreach my $s (0 .. $#form) {
                 $links_to_do--;
                 $used[0][$w0] = 1;
                 $used[1][$w1] = 1;
+                $alignment_word{$form[$s][0][$w0]}{$form[$s][1][$w1]}++;
             }
             last if !$links_to_do;
         }
     }
-    elsif ($type eq 'union') {
-        my %aligned;
-        foreach my $w0 (0 .. $#{$form[$s][0]}) {
-            my $best_ali = "";
-            my $best_score = 0;
-            foreach my $w1 (0 .. $#{$form[$s][1]}) {
-                if ($candidate_scores{"$w0-$w1"} > $best_score) {
-                    $best_ali = "$w0-$w1";
-                    $best_score = $candidate_scores{"$w0-$w1"};
-                }
-            }
-            $aligned{$best_ali} = 1;
-        }
-        foreach my $w1 (0 .. $#{$form[$s][1]}) {
-            my $best_ali = "";
-            my $best_score = 0;
-            foreach my $w0 (0 .. $#{$form[$s][0]}) {
-                if ($candidate_scores{"$w0-$w1"} > $best_score) {
-                    $best_ali = "$w0-$w1";
-                    $best_score = $candidate_scores{"$w0-$w1"};
-                }
-            }
-            $aligned{$best_ali} = 1;
-        }
-        @alignment = keys %aligned;
-    }
-    elsif ($type eq 'uni-src') {
-        my %aligned;
-        foreach my $w0 (0 .. $#{$form[$s][0]}) {
-            my $best_ali = "";
-            my $best_score = 0;
-            foreach my $w1 (0 .. $#{$form[$s][1]}) {
-                if ($candidate_scores{"$w0-$w1"} > $best_score) {
-                    $best_ali = "$w0-$w1";
-                    $best_score = $candidate_scores{"$w0-$w1"};
-                }
-            }
-            $aligned{$best_ali} = 1;
-        }
-        @alignment = keys %aligned;
-    }
     print join " ", @alignment;
     print "\n";
 }
+
+my $ALIGNED_WORDS = 1;
+{
+    open my $file, '>:utf8', $ARGV[2];
+    foreach my $w0 (keys %alignment_word) {
+        my @sorted = sort {$alignment_word{$w0}{$a} <=> $alignment_word{$w0}{$b}}
+            keys $alignment_word{$w0};
+        my $total = 0;
+        foreach my $w1 (@sorted) {
+            $total += $alignment_word{$w0}{$w1};
+        }
+        for (my $i = 0; $i < $ALIGNED_WORDS; $i++) {
+            my $w1 = $sorted[$i];
+            my $score = $alignment_word{$w0}{$w1} / $total;
+            print $file "$w0 $w1 $score\n";
+        }
+    }
+    close $file;
+}
+
+
