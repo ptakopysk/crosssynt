@@ -20,9 +20,9 @@ import math
 # LENIMP = 0.2
 
 # max number of translation options for a word
-ALIGNED_WORDS = 15
+ALIGNED_WORDS = 1
 
-DEBUG = 2
+DEBUG = 1
 
 vowels = r"[aeiouy]"
 
@@ -213,11 +213,19 @@ def save_trtable(trtable_file):
                 print(" ".join([srcword, tgtword, str(count/total)]), file=trtable)
 
 if __name__ == "__main__":
+    if DEBUG >= 1:
+        print("INITING...", file=sys.stderr)
     init(sys.argv[1], sys.argv[2])
+    
+    if DEBUG >= 1:
+        print("ALIGNING...", file=sys.stderr)
     for sent_index in range(len(sentences_src)):
         align(sent_index)
         print_alignment(sent_index)
         if DEBUG >= 1:
             print("aligned sent " + str(sent_index), file=sys.stderr)
+    
+    if DEBUG >= 1:
+        print("SAVING...", file=sys.stderr)
     save_trtable(sys.argv[3])
 
