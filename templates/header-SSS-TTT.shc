@@ -112,9 +112,12 @@ mlma=models/$s-$t.lm.arpa.$t
 mlmb=models/$s-$t.lm.blm.$t
 # translated conllu data
 srctransmoses=treebanks/$s-$t-ud-train.transmoses.conllu
+srctransmamoses=treebanks/$s-$t-ud-train.monoalign-transmoses.conllu
+mamosesdir=moseswork_monoalign/$s-$t/
 # parsing model
 mtransmosestag=models/$s-$t.transmoses-$f-w2v.tagsrc.udpipe
 mtransmosesxtag=models/$s-$t.transmoses-$f-w2v.xtagsrc.udpipe
+mtransmamosestag=models/$s-$t.monoalign-transmoses-$f-w2v.tagsrc.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
 

@@ -1,0 +1,17 @@
+# Memory limit
+#$ -l h_vmem=5g
+#$ -l mem_free=5g
+
+cat $srctrain | grep -v '^#'|cut -f1 > $srctransmamoses.col1
+cat $srctrain | grep -v '^#'|cut -f3- > $srctransmamoses.col3-
+
+cat $srctrain | grep -v '^#'|cut -f2 | tr "\n" " "| sed 's/  /\n/g' | \
+    sed 's/|/:/g' | \
+    mosesdecoder/scripts/recaser/truecase.perl --model $mtgttrue | \
+    mosesdecoder/bin/moses -f $mamosesdir/mert-work/moses.ini -dl 0 | \
+    perl -n -CS -e 'print ucfirst' | \
+    tr " " "\n" > $srctransmamoses.col2
+
+paste $srctransmamoses.col1 $srctransmamoses.col2 $srctransmamoses.col3- | sed 's/^\t\t$//' > $srctransmamoses
+rm $srctransmamoses.col1 $srctransmamoses.col2 $srctransmamoses.col3-
+
