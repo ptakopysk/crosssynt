@@ -24,6 +24,8 @@ ALIGNED_WORDS = 1
 
 DEBUG = 1
 
+ALIGN_OUTPUT = 2
+
 vowels = r"[aeiouy]"
 
 counts_src = Counter()
@@ -186,15 +188,21 @@ def align(srctokens, tgttokens):
     return alignment
 
 def print_alignment(sent_index, srctokens, tgttokens, alignment):
-    print(sent_index)
-    print(str(len(srctokens)) + " "
-        + " ".join(srctokens) + "  # "
-        + " ".join([str(x+1) for (x,_) in alignment[0]]) + "  # "
-        + " ".join([str(x)   for (_,x) in alignment[0]]))
-    print(str(len(tgttokens)) + " "
-        + " ".join(tgttokens) + "  # "
-        + " ".join([str(x+1) for (x,_) in alignment[1]]) + "  # "
-        + " ".join([str(x)   for (_,x) in alignment[1]]))
+    if ALIGN_OUTPUT == 1:
+        print(sent_index)
+        print(str(len(srctokens)) + " "
+                + " ".join(srctokens) + "  # "
+                + " ".join([str(x+1) for (x,_) in alignment[0]]) + "  # "
+                + " ".join([str(x)   for (_,x) in alignment[0]]))
+        print(str(len(tgttokens)) + " "
+                + " ".join(tgttokens) + "  # "
+                + " ".join([str(x+1) for (x,_) in alignment[1]]) + "  # "
+                + " ".join([str(x)   for (_,x) in alignment[1]]))
+    elif ALIGN_OUTPUT == 2:
+        print(" ".join([str(s)+"-"+str(t)
+            for s,(t,_) in enumerate(alignment[0])
+            if t != -1]))
+
 
 def align_files(srcfile, tgtfile):
     sent_index = 0
@@ -228,8 +236,9 @@ if __name__ == "__main__":
     if DEBUG >= 1:
         print("ALIGNING...", file=sys.stderr)
     align_files(sys.argv[1], sys.argv[2])
-    
-    if DEBUG >= 1:
-        print("SAVING...", file=sys.stderr)
-    save_trtable(sys.argv[3])
+
+    if len(sys.argv) > 3:
+        if DEBUG >= 1:
+            print("SAVING...", file=sys.stderr)
+        save_trtable(sys.argv[3])
 
