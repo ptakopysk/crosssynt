@@ -1,6 +1,7 @@
 # Memory limit
-#$ -l h_vmem=3g
-#$ -l mem_free=3g
+#$ -l mem_free=6g
+#$ -l act_mem_free=6g
+#$ -l h_vmem=6g
 #
 # 10 threads
 #$ -pe smp 10
