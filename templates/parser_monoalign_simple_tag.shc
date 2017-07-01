@@ -1,10 +1,11 @@
 # Memory limit
-#$ -l h_vmem=6g
 #$ -l mem_free=6g
+#$ -l act_mem_free=6g
+#$ -l h_vmem=6g
 
-cat $srctransmoses | \
+cat $srctransmonoalign | \
     tools/feats2FEAT.py $f | \
     $udpipe --train --tokenizer=none \
     --tagger='use_lemma=0;provide_lemma=0;'$taggeropts \
     --parser='embedding_form_file='$ptgt'.vectors' \
-    $mtransmosestag
+    $mtransmonoaligntag

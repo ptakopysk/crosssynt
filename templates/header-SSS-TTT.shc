@@ -127,6 +127,10 @@ tgtdeventransmoses=treebanks/$t-en-ud-dev.transmoses.conllu
 
 outmganoxtag=treebanks/$s-$t-ud-dev.mga.noxtag
 
+# monoalign
+
+srctransmonoalign=treebanks/$s-$t-ud-train.monoalign.conllu
+mtransmonoaligntag=models/$s-$t.monoalign-$f-w2v.tagsrc.udpipe
 
 # slonlp
 srctrain_monotrans=treebanks/$s-ud-train-monotrans-$t.conllu
