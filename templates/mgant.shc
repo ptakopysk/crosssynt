@@ -13,10 +13,12 @@ $treexp \
     Read::AlignedSentences $sl'_'$ss=!$psrc-splitmgant/'*' $tl'_'$ts=!$ptgt-splitmgant/'*' \
     Util::SetGlobal language=$tl selector=$ts \
         W2A::Tokenize  \
-        Util::Eval anode='$anode->set_tag($anode->conll_cpos)' \
+        Util::Eval anode='$anode->set_tag("_")' \
+        Util::Eval anode='$anode->set_lemma($anode->form)' \
     Util::SetGlobal language=$sl selector=$ss \
         W2A::Tokenize  \
-        Util::Eval anode='$anode->set_tag($anode->conll_cpos)' \
+        Util::Eval anode='$anode->set_tag("_")' \
+        Util::Eval anode='$anode->set_lemma($anode->form)' \
       Align::A::MonolingualGreedy to_language=$tl to_selector=$ts \
       Write::Alignments layer=a \
           language=$tl selector=$ts source_language=$sl source_selector=$ss \
