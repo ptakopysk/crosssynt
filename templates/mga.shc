@@ -5,7 +5,7 @@
 # split, tokenize, tag and align para
 mkdir -p $psrc-splitmga/
 split -a 5 -d -l 10000 $psrc $psrc-splitmga/
-mkdir -p $ptgt-split/
+mkdir -p $ptgt-splitmga/
 split -a 5 -d -l 10000 $ptgt $ptgt-splitmga/
 mkdir -p $p-mgaalign/
 

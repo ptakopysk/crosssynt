@@ -5,7 +5,7 @@
 # split, tokenize, tag and align para
 mkdir -p $psrc-splitmgant/
 split -a 5 -d -l 10000 $psrc $psrc-splitmgant/
-mkdir -p $ptgt-split/
+mkdir -p $ptgt-splitmgant/
 split -a 5 -d -l 10000 $ptgt $ptgt-splitmgant/
 mkdir -p $p-mgaalignntmgant/
 
