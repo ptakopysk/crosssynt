@@ -53,7 +53,7 @@ f=Case
 # tools
 udpipe=tools/udpipe
 word2vec="tools/word2vec -cbow 0 -size 50 -window 10 -negative 5 -hs 0 -sample 1e-1 -threads 10 -binary 0 -iter 15 -min-count 5"
-treexp="treex -p --survive --cleanup --queue troja-all.q -m 5G -j 100"
+treexp="treex -p --survive --cleanup --queue troja-all.q -m 5G -j 10"
 
 # tagger setup
 if [ $s = cs ]
@@ -118,11 +118,18 @@ mlmb=models/$s-$t.lm.blm.$t
 # translated conllu data
 srctransmoses=treebanks/$s-$t-ud-train.transmoses.conllu
 srctransmamoses=treebanks/$s-$t-ud-train.monoalign-transmoses.conllu
+srctransmgamoses=treebanks/$s-$t-ud-train.mga-transmoses.conllu
+srctransmgantmoses=treebanks/$s-$t-ud-train.mgant-transmoses.conllu
+mosesdir=moseswork/$s-$t/
 mamosesdir=moseswork_monoalign/$s-$t/
+mgamosesdir=moseswork_mga/$s-$t/
+mgantmosesdir=moseswork_mgant/$s-$t/
 # parsing model
 mtransmosestag=models/$s-$t.transmoses-$f-w2v.tagsrc.udpipe
 mtransmosesxtag=models/$s-$t.transmoses-$f-w2v.xtagsrc.udpipe
 mtransmamosestag=models/$s-$t.monoalign-transmoses-$f-w2v.tagsrc.udpipe
+mtransmgamosestag=models/$s-$t.mga-transmoses-$f-w2v.tagsrc.udpipe
+mtransmgantmosestag=models/$s-$t.mgant-transmoses-$f-w2v.tagsrc.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
 
