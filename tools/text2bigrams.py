@@ -8,6 +8,8 @@ import sys
 
 START = "[START]"
 
+MINCOUNT = 2
+
 class Bigrams:
 
     def __init__(self):
@@ -24,6 +26,12 @@ class Bigrams:
                 word = line.rstrip().lower()
                 self.add(word, prev)
                 prev = word
+
+    def filter(self):
+        for prev in self.bigrams:
+            for word in list(self.bigrams[prev].keys()):
+                if self.bigrams[prev][word] < MINCOUNT:
+                    del self.bigrams[prev][word]
     
     def writeout(self, filename):
         with open(filename, "wb") as outfile:
@@ -33,4 +41,5 @@ class Bigrams:
 if __name__ == "__main__":
     f = Bigrams()
     f.readin(sys.argv[1])
+    f.filter()
     f.writeout(sys.argv[2])

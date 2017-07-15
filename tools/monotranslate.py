@@ -9,6 +9,7 @@ from unidecode import unidecode
 import re
 from functools import lru_cache
 import math
+from monotr_lm import LM
 
 # usage: ./monotranslate.py src.freqlist tgt.freqlist < src_input > tgt_output
 
@@ -34,13 +35,17 @@ vowels = r"[aeiouy]"
 
 srclist = None
 tgtlist = None
+lm = None
 
-def init(srclistfile, tgtlistfile):
-    global srclist, tgtlist
+def init(srclistfile, tgtlistfile, lmfile=None):
+    global srclist, tgtlist, lm
     with open(srclistfile,"rb") as packed:
         srclist = msgpack.load(packed, encoding="utf-8", use_list=False)
     with open(tgtlistfile,"rb") as packed:
         tgtlist = msgpack.load(packed, encoding="utf-8", use_list=False)
+    if lmfile is not None:
+        lm = LM()
+        lm.load(lmfile)
 
 @lru_cache(maxsize=1024)
 def isvow(char):
@@ -78,7 +83,7 @@ def sortedtgtdict(prefix, tgt_length):
     return sorted(d, key=d.get, reverse=True)
 
 @lru_cache(maxsize=65536)
-def translate(srcword):
+def translate(srcword, prevs):
     if OOV:
         tgt_best = "__OOV__"
         tgt_best_score = 0
@@ -87,24 +92,36 @@ def translate(srcword):
         tgt_best = srcword
         tgt_best_score = simscore(srcword, srcword)
     if DEBUG >= 1:
-        print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
+        print("SRC: " + srcword + " TGT: " + tgt_best + " "
+                + str(tgt_best_score), file=sys.stderr)
     if TRY_ALL:
         for key in tgtlist:
             if key != None:
-                (tgt_best, tgt_best_score) = translate_internal(srcword, key[0], key[1], tgt_best, tgt_best_score)
+                (tgt_best, tgt_best_score) = translate_internal(
+                        srcword, key[0], key[1], tgt_best, tgt_best_score)
     else:
         (_, _, _, prefix, src_length) = deacc_dewov(srcword)
         for tgt_length in [src_length, src_length-1, src_length+1]:
             if (prefix,tgt_length) not in tgtlist:
                 continue
-            (tgt_best, tgt_best_score) = translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score)
+            (tgt_best, tgt_best_score) = translate_internal(
+                    srcword, prefix, tgt_length, tgt_best, tgt_best_score)
+        if (lm is not None):
+            if DEBUG >= 1:
+                print("add lm cands", file=sys.stderr)
+            for tgtword in lm.generate(prevs):
+                if DEBUG >= 2:
+                    print("lm cand: " + tgtword, file=sys.stderr)
+                (tgt_best, tgt_best_score) = translate_try(
+                        srcword, tgtword, tgt_best, tgt_best_score)
     return (tgt_best, tgt_best_score)
 
 def translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score):
     # traverse from more frequent to less frequent with early stopping
     for tgtword in sortedtgtdict(prefix, tgt_length):
         if DEBUG >= 2:
-            print("TGT: " + tgtword + " count: " + str(wordcount(tgtword, tgtlist)), file=sys.stderr)
+            print("TGT: " + tgtword + " count: "
+                    + str(wordcount(tgtword, tgtlist)), file=sys.stderr)
         if freqsim(srcword, tgtword) < tgt_best_score:
             # no need to go on, cannot be better than current best
             if tgtwordfreq(tgtword) < srcwordfreq(srcword):
@@ -114,14 +131,19 @@ def translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score):
                 # too frequent, move on in the list
                 continue
         # "else" -- passed frequency check
-        score = simscore(srcword, tgtword, tgt_best_score)
-        if score > tgt_best_score:
-            tgt_best = tgtword
-            tgt_best_score = score
-            if DEBUG >= 1:
-                print("SRC: " + srcword + " TGT: " + tgt_best + " " + str(tgt_best_score), file=sys.stderr)
+        (tgt_best, tgt_best_score) = translate_try(
+                srcword, tgtword, tgt_best, tgt_best_score)
     return (tgt_best, tgt_best_score)
 
+def translate_try(srcword, tgtword, tgt_best, tgt_best_score):
+    score = simscore(srcword, tgtword, tgt_best_score)
+    if score > tgt_best_score:
+        tgt_best = tgtword
+        tgt_best_score = score
+        if DEBUG >= 1:
+            print("SRC: " + srcword + " TGT: " + tgt_best + " "
+                    + str(tgt_best_score), file=sys.stderr)
+    return (tgt_best, tgt_best_score)
 
 # Jaro Winkler that can take emtpy words
 @lru_cache(maxsize=65536)
@@ -145,8 +167,10 @@ def freqsim(srcword, tgtword):
     if DEBUG >= 2:
         print("SRC: " + srcword, file=sys.stderr)
         print("TGT: " + tgtword, file=sys.stderr)
-        print("count: " + str(wordcount(srcword, srclist)) + " freq: " + str(src_freq), file=sys.stderr)
-        print("count: " + str(wordcount(tgtword, tgtlist)) + " freq: " + str(tgt_freq), file=sys.stderr)
+        print("count: " + str(wordcount(srcword, srclist)) + " freq: "
+                + str(src_freq), file=sys.stderr)
+        print("count: " + str(wordcount(tgtword, tgtlist)) + " freq: "
+                + str(tgt_freq), file=sys.stderr)
         print("freqsim: " + str(freq_sim), file=sys.stderr)
     if freq_sim > FREQSIM_THRESH:
         freq_sim = FREQSIM_THRESH + 0.1*(freq_sim-FREQSIM_THRESH)
@@ -212,8 +236,10 @@ def simscore(srcword, tgtword, current_best_score=0):
         print("sim    : " + str(sim), file=sys.stderr)
     return sim
 
-def translatecased(word):
-    (translation, score) = translate(word.lower())
+# prevs must already be lc'd
+def translatecased(word, prevs):
+    (translation, score) = translate(word.lower(), prevs)
+    # if prevs not lc'd:  tuple(p.lower() for p in prevs)
     if(word.istitle()):
         translation = translation.title()
     if(word.isupper()):
@@ -221,19 +247,43 @@ def translatecased(word):
     return (translation, score)
 
 def translateline(line):
-    return " ".join([translatecased(word)[0] for word in line.split()])
+    prevs = lm.prevdeque()
+    translation = []
+    for word in line.split():
+        word_translation = translatecased(word, tuple(prevs))[0]
+        translation.append(word_translation)
+        prevs.append(word_translation.lower())
+    return " ".join(translation)
 
-def translatetbline(line):
+def processtbline(line):
+    assert False
     line = line.rstrip('\n')
     if line != '' and not line.startswith('#'):
         fields = line.split('\t')
-        (fields[1], score) = translatecased(fields[1])
-        return('\t'.join(fields), score, 1)
+        return fields
     else:
-        return(line, 0, 0)
+        return None
+
+# TODO keep previous translations in prevs (just the words, lc'd)
+def translatetbline(line, prevs):
+    assert False
+    # TODO implement
+    #fields = processtbline(line)
+    #prevtgtfields = processtbline(prevtgtline)
+    #if fields is not None:
+    #    if prevtgtfields is not None:
+    #        (fields[1], score) = translatecased(fields[1], prevtgtfields[1])
+    #    else:
+    #        (fields[1], score) = translatecased(fields[1], START)
+    #    return('\t'.join(fields), score, 1)
+    #else:
+    #    return(line, 0, 0)
 
 if __name__ == "__main__":
-    init(sys.argv[1], sys.argv[2])
+    if (len(sys.argv)) >= 4:
+        init(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+        init(sys.argv[1], sys.argv[2])
     for line in sys.stdin:
         print(translateline(line))
 
