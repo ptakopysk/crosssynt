@@ -22,6 +22,9 @@ class LM:
     # suggest this many translaton candidates by the LM
     GENERATE_N = 20
 
+    # probability of unseen ngrams
+    SMOOTH = 0.001
+
     def __init__(self):
         self.ngrams = defaultdict(lambda : Counter())
     
@@ -68,6 +71,16 @@ class LM:
                         key=self.ngrams[index].get)
         # big else
         return []
+
+    def score(self, prevs, word):
+        """Likelihood of word following prevs; uniform interpolation."""
+        total = LM.SMOOTH
+        for n in range(LM.N-1, 0, -1):
+            index = prevs[-n:]
+            if index in self.ngrams and word in self.ngrams[index]:
+                divsor = sum(self.ngrams[index].values())
+                total += self.ngrams[index][word] / divsor
+        return total / (LM.N-1+LM.SMOOTH)
 
 # default: read in text, 1 word per line
 if __name__ == "__main__":

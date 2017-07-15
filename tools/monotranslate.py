@@ -31,6 +31,10 @@ TRY_ALL = 0
 
 DEBUG = 1
 
+USE_LM = True
+
+ADD_LM = True
+
 vowels = r"[aeiouy]"
 
 srclist = None
@@ -90,7 +94,7 @@ def translate(srcword, prevs):
     else:
         # init with keeping the original word
         tgt_best = srcword
-        tgt_best_score = simscore(srcword, srcword)
+        tgt_best_score = simscore(srcword, srcword, prevs)
     if DEBUG >= 1:
         print("SRC: " + srcword + " TGT: " + tgt_best + " "
                 + str(tgt_best_score), file=sys.stderr)
@@ -98,25 +102,25 @@ def translate(srcword, prevs):
         for key in tgtlist:
             if key != None:
                 (tgt_best, tgt_best_score) = translate_internal(
-                        srcword, key[0], key[1], tgt_best, tgt_best_score)
+                        srcword, prevs, key[0], key[1], tgt_best, tgt_best_score)
     else:
         (_, _, _, prefix, src_length) = deacc_dewov(srcword)
         for tgt_length in [src_length, src_length-1, src_length+1]:
             if (prefix,tgt_length) not in tgtlist:
                 continue
             (tgt_best, tgt_best_score) = translate_internal(
-                    srcword, prefix, tgt_length, tgt_best, tgt_best_score)
-        if (lm is not None):
+                    srcword, prevs, prefix, tgt_length, tgt_best, tgt_best_score)
+        if (lm is not None and ADD_LM):
             if DEBUG >= 1:
                 print("add lm cands", file=sys.stderr)
             for tgtword in lm.generate(prevs):
                 if DEBUG >= 2:
                     print("lm cand: " + tgtword, file=sys.stderr)
                 (tgt_best, tgt_best_score) = translate_try(
-                        srcword, tgtword, tgt_best, tgt_best_score)
+                        srcword, tgtword, prevs, tgt_best, tgt_best_score)
     return (tgt_best, tgt_best_score)
 
-def translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score):
+def translate_internal(srcword, prevs, prefix, tgt_length, tgt_best, tgt_best_score):
     # traverse from more frequent to less frequent with early stopping
     for tgtword in sortedtgtdict(prefix, tgt_length):
         if DEBUG >= 2:
@@ -132,11 +136,11 @@ def translate_internal(srcword, prefix, tgt_length, tgt_best, tgt_best_score):
                 continue
         # "else" -- passed frequency check
         (tgt_best, tgt_best_score) = translate_try(
-                srcword, tgtword, tgt_best, tgt_best_score)
+                srcword, tgtword, prevs, tgt_best, tgt_best_score)
     return (tgt_best, tgt_best_score)
 
-def translate_try(srcword, tgtword, tgt_best, tgt_best_score):
-    score = simscore(srcword, tgtword, tgt_best_score)
+def translate_try(srcword, tgtword, prevs, tgt_best, tgt_best_score):
+    score = simscore(srcword, tgtword, prevs, tgt_best_score)
     if score > tgt_best_score:
         tgt_best = tgtword
         tgt_best_score = score
@@ -183,7 +187,7 @@ def lensim(srclen, tgtlen):
 # early stopping once similarity falls bellow current best
 # (jw is costly)
 @lru_cache(maxsize=1024)
-def simscore(srcword, tgtword, current_best_score=0):
+def simscore(srcword, tgtword, prevs, current_best_score=0):
     freq_sim = freqsim(srcword, tgtword)
     src_dd = deacc_dewov(srcword)
     tgt_dd = deacc_dewov(tgtword)
@@ -232,6 +236,20 @@ def simscore(srcword, tgtword, current_best_score=0):
     if DEBUG >= 2:
         print("jwsimdd: " + str(jw_sim_deacc_devow), file=sys.stderr)
     sim *= jw_sim_deacc_devow
+    if sim < current_best_score:
+        return sim
+   
+    # TODO maybe move up?
+    # TODO not sure about early stopping now
+    lm_score = 1
+    if lm is not None and USE_LM:
+        lm_score = lm.score(prevs, tgtword)**0.25  # 4th root
+        if DEBUG >= 2:
+            print("lmscore: " + str(lm_score), file=sys.stderr)
+    sim *= lm_score
+    if sim < current_best_score:
+        return sim
+    
     if DEBUG >= 2:
         print("sim    : " + str(sim), file=sys.stderr)
     return sim
