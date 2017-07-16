@@ -1,0 +1,12 @@
+
+monotranslate mnoo dta generation for sent-based lm
+
+now runs out of mem and does not process the whole megalong line
+
+possible solution:
+https://stackoverflow.com/questions/1251999/how-can-i-replace-a-newline-n-using-sed
+
+...use empty lines as sent separators, and replace just the newlines that are not empty lines
+
+(or do that in Perl or so...)
+

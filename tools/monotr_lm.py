@@ -40,7 +40,7 @@ class LM:
         """Generate a deque of N-1 START symbols."""
         return deque([LM.START] * (LM.N-1), maxlen=LM.N-1)
     
-    def readin(self, filename):
+    def readin_words(self, filename):
         with open(filename, "r") as infile:
             # maxlen: autodiscard surplus items
             prevs = self.prevdeque()
@@ -48,6 +48,14 @@ class LM:
                 word = line.rstrip().lower()
                 self.add(word, tuple(prevs))
                 prevs.append(word)
+
+    def readin_sentences(self, filename):
+        with open(filename, "r") as infile:
+            for line in infile:
+                prevs = self.prevdeque()
+                for word in line.rstrip().lower().split():
+                    self.add(word, tuple(prevs))
+                    prevs.append(word)
 
     def filter(self):
         for prevs in self.ngrams:
@@ -85,6 +93,6 @@ class LM:
 # default: read in text, 1 word per line
 if __name__ == "__main__":
     f = LM()
-    f.readin(sys.argv[1])
+    f.readin_sentences(sys.argv[1])
     f.filter()
     f.writeout(sys.argv[2])
