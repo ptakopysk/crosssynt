@@ -5,7 +5,6 @@
 # 10 threads
 #$ -pe smp 10
 
-mkdir -p $mgamosesdir
 cd $mgamosesdir
 
 # -reordering msd-bidirectional-fe 
