@@ -10,6 +10,8 @@ from heapq import nlargest
 
 class LM:
 
+    valid = False
+
     # start of sentence symbol
     START = "[START]"
 
@@ -48,6 +50,7 @@ class LM:
                 word = line.rstrip().lower()
                 self.add(word, tuple(prevs))
                 prevs.append(word)
+        self.valid = True
 
     def readin_sentences(self, filename):
         with open(filename, "r") as infile:
@@ -56,6 +59,7 @@ class LM:
                 for word in line.rstrip().lower().split():
                     self.add(word, tuple(prevs))
                     prevs.append(word)
+        self.valid = True
 
     def filter(self):
         for prevs in self.ngrams:
@@ -70,6 +74,7 @@ class LM:
     def load(self, filename):
         with open(filename,"rb") as packed:
             self.ngrams = msgpack.load(packed, encoding="utf-8", use_list=False)
+        self.valid = True
 
     def generate(self, prevs):
         for n in range(LM.N-1, 0, -1):

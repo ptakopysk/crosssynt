@@ -39,7 +39,7 @@ vowels = r"[aeiouy]"
 
 srclist = None
 tgtlist = None
-lm = None
+lm = LM()
 
 def init(srclistfile, tgtlistfile, lmfile=None):
     global srclist, tgtlist, lm
@@ -48,7 +48,6 @@ def init(srclistfile, tgtlistfile, lmfile=None):
     with open(tgtlistfile,"rb") as packed:
         tgtlist = msgpack.load(packed, encoding="utf-8", use_list=False)
     if lmfile is not None:
-        lm = LM()
         lm.load(lmfile)
 
 @lru_cache(maxsize=1024)
@@ -110,7 +109,7 @@ def translate(srcword, prevs):
                 continue
             (tgt_best, tgt_best_score) = translate_internal(
                     srcword, prevs, prefix, tgt_length, tgt_best, tgt_best_score)
-        if (lm is not None and ADD_LM):
+        if (lm.valid and ADD_LM):
             if DEBUG >= 1:
                 print("add lm cands", file=sys.stderr)
             for tgtword in lm.generate(prevs):
@@ -242,7 +241,7 @@ def simscore(srcword, tgtword, prevs, current_best_score=0):
     # TODO maybe move up?
     # TODO not sure about early stopping now
     lm_score = 1
-    if lm is not None and USE_LM:
+    if lm.valid and USE_LM:
         lm_score = lm.score(prevs, tgtword)**0.25  # 4th root
         if DEBUG >= 2:
             print("lmscore: " + str(lm_score), file=sys.stderr)
