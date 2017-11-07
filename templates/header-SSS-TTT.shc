@@ -166,6 +166,10 @@ mtransmosestlt=models/$s-$t.transmoses-w2v.tlt.udpipe
 mdelextlt=models/$s-$t.delex.tlt.udpipe
 msupdelextlt=models/$s-$t.sup-delex.tlt.udpipe
 msuptlt=models/$s-$t.sup-w2v.tlt.udpipe
+outtransmosestlt=outputs/$s-$t.transmoses-w2v.tlt.dev.conllu
+outdelextlt=outputs/$s-$t.delex.tlt.dev.conllu
+outsupdelextlt=outputs/$s-$t.sup-delex.tlt.dev.conllu
+outsuptlt=outputs/$s-$t.sup-w2v.tlt.dev.conllu
 
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.
