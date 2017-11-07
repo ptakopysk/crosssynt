@@ -11,6 +11,7 @@ generate parser_delex_sup_tlt
 generate parser_delex_tlt
 generate parser_sup_tlt
 generate parser_transmoses_tlt
+generate moses_evalbleu
 generate eval_moses_tlt
 
 cd run/
@@ -44,6 +45,8 @@ qsub -hold_jid moses_tune-$S \
 qsub -hold_jid word2vec-$S,moses_translate-$S,tgttagger_tlt-$S \
     parser_transmoses_tlt-$S
 
+qsub -hold_jid moses_translate-$S \
+    moses_evalbleu-$S
 qsub -hold_jid parser_delex_sup_tlt-$S,parser_delex_tlt-$S,parser_sup_tlt-$S,parser_transmoses_tlt-$S \
     eval_moses_tlt-$S
 
