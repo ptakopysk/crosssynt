@@ -1,0 +1,24 @@
+# Memory limit
+#$ -l h_vmem=1g
+#$ -l mem_free=1g
+
+echo Evaluation of the DELEX SUPervised MONO-lingual parser in $msupdelextlt, pred tags
+cat $tgtdtest | \
+    $udpipe --tag $mtgttlt | \
+    $udpipe --accuracy --parse $msupdelextlt
+
+echo Evaluation of the SUPervised MONO-lingual parser in $msuptlt, pred tags
+cat $tgtdtest | \
+    $udpipe --tag $mtgttlt | \
+    $udpipe --accuracy --parse $msuptlt
+
+echo Evaluation of the DELEX CROSS-lingual parser in $mdelextlt, pred tags
+cat $tgtdtest | \
+    $udpipe --tag $mtgttlt | \
+    $udpipe --accuracy --parse $mdelextlt
+
+echo Evaluation of the MOSES CROSS-lingual parser in $mtransmosestlt, no xtag (pred tags)
+cat $tgtdtest | \
+    $udpipe --tag $mtgttlt | \
+    $udpipe --accuracy --parse $mtransmosestlt
+

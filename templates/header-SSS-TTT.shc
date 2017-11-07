@@ -159,6 +159,14 @@ mcross_monotrans_tag_paradata=models/$s-$t.monotrans-paradata-tag.udpipe
 mdelex_pos=models/$s-$t.delex-pos.udpipe
 mdelex_monotrans_pos=models/$s-$t.delex-monotrans-pos.udpipe
 
+# tlt
+msrctlt=models/$s-$t.$s-tagger.tlt.udpipe
+mtgttlt=models/$s-$t.$t-tagger.tlt.udpipe
+mtransmosestlt=models/$s-$t.transmoses-w2v.tlt.udpipe
+mdelextlt=models/$s-$t.delex.tlt.udpipe
+msupdelextlt=models/$s-$t.sup-delex.tlt.udpipe
+msuptlt=models/$s-$t.sup-w2v.tlt.udpipe
+
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.
 # Do NOT change the END_HEADER line!!!
