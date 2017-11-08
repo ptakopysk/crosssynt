@@ -5,5 +5,5 @@
 cat $tgttrain | \
     $udpipe --tag $mtgttlt | \
     $udpipe --train --tokenizer=none --tagger=none \
-    --parser='embedding_feats:0;embedding_form_file='$ptgt'.vectors' \
+    --parser='embedding_feats=0;embedding_form_file='$ptgt'.vectors' \
     $msuptlt

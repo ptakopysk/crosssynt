@@ -5,5 +5,5 @@
 cat $tgttrain | \
     $udpipe --tag $mtgttlt | \
     $udpipe --train --tokenizer=none --tagger=none \
-    --parser='embedding_feats:0;embedding_form=0' \
+    --parser='embedding_feats=0;embedding_form=0' \
     $msupdelextlt
