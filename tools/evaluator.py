@@ -7,19 +7,31 @@ import argparse
 parser = argparse.ArgumentParser(description="evaluate tagger and/or parser output")
 parser.add_argument("goldfile", help="gold annotation conllu file")
 parser.add_argument("predfile", help="parser output connlu file")
-parser.add_argument("-d", "--deprelfactored",
-    help="factor output according to deprel instead of UPOS",
-    action="store_true")
-parser.add_argument("-g", "--gold",
-    help="factor according to gold labels instead of predicted",
-    action="store_true")
-parser.add_argument("-e", "--errorshare",
-    help="share of total error instead of individual accuracy",
-    action="store_true")
 parser.add_argument("-m", "--measure",
     help="accuracy of what to measure",
     choices=['pos', 'head', 'deprel', 'las'],
     default='las')
+# TODO mutually exclusive
+parser.add_argument("-u", "--posfactored",
+    help="factor output according to UPOS (default)",
+    action="store_true")
+parser.add_argument("-d", "--deprelfactored",
+    help="factor output according to deprel instead of UPOS",
+    action="store_true")
+# TODO mutually exclusive
+parser.add_argument("-p", "--predicted",
+    help="factor according to predicted labels (default)",
+    action="store_true")
+parser.add_argument("-g", "--gold",
+    help="factor according to gold labels instead of predicted",
+    action="store_true")
+# TODO mutually exclusive
+parser.add_argument("-a", "--accuracy",
+    help="individual accuracy (default)",
+    action="store_true")
+parser.add_argument("-e", "--errorshare",
+    help="share of total error instead of individual accuracy",
+    action="store_true")
 args = parser.parse_args()
 
 UPOS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET', 'INTJ', 'NOUN', 'NUM',
