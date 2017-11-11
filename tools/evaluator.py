@@ -32,6 +32,9 @@ parser.add_argument("-a", "--accuracy",
 parser.add_argument("-e", "--errorshare",
     help="share of total error instead of individual accuracy",
     action="store_true")
+parser.add_argument("-j", "--joined",
+    help="joined nonfactored eval",
+    action="store_true")
 args = parser.parse_args()
 
 UPOS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET', 'INTJ', 'NOUN', 'NUM',
@@ -167,25 +170,31 @@ gold.close()
 pred.close()
 
 # OUTPUT
-if args.deprelfactored:
-    labels = UDEP
-else:
-    labels = UPOS
-if args.errorshare:
-    if args.gold:
-        errors = [evaluation_gold[label].get_named_error_count(args.measure)
-                for label in labels]
+if args.joined:
+    if args.errorshare:
+        print(evaluation_all.get_named(args.measure))
     else:
-        errors = [evaluation_pred[label].get_named_error_count(args.measure)
-                for label in labels]
-    total_errors = sum(errors)
-    output = [str(error/total_errors) for error in errors]
+        print(evaluation_all.get_named_error_count(args.measure))
 else:
-    if args.gold:
-        output = [str(evaluation_gold[label].get_named(args.measure))
-                for label in labels]
+    if args.deprelfactored:
+        labels = UDEP
     else:
-        output = [str(evaluation_pred[label].get_named(args.measure))
-                for label in labels]
-print('\t'.join(output))
+        labels = UPOS
+    if args.errorshare:
+        if args.gold:
+            errors = [evaluation_gold[label].get_named_error_count(args.measure)
+                    for label in labels]
+        else:
+            errors = [evaluation_pred[label].get_named_error_count(args.measure)
+                    for label in labels]
+        total_errors = sum(errors)
+        output = [str(error/total_errors) for error in errors]
+    else:
+        if args.gold:
+            output = [str(evaluation_gold[label].get_named(args.measure))
+                    for label in labels]
+        else:
+            output = [str(evaluation_pred[label].get_named(args.measure))
+                    for label in labels]
+    print('\t'.join(output))
 
