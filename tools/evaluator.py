@@ -37,17 +37,33 @@ parser.add_argument("-j", "--joined",
     action="store_true")
 args = parser.parse_args()
 
-UPOS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET', 'INTJ', 'NOUN', 'NUM',
-    'PART', 'PRON', 'PROPN', 'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X' ]
+#UPOS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET', 'INTJ', 'NOUN', 'NUM',
+#    'PART', 'PRON', 'PROPN', 'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X' ]
+
+# ordered by frequency in en-ud-train.conllu
+UPOS = [
+       'NOUN', 'VERB', 'PRON', 'ADP', 'DET', 'PROPN', 'ADJ', 'ADV',
+       'AUX','PUNCT', 'CONJ', 'PART', 'NUM', 'SCONJ', 'X', 'INTJ', 'SYM'
+        ]
 
 # TODO only use the universal ones...
-UDEP = [ 'acl', 'advcl', 'advmod', 'amod', 'appos', 'aux',
-    'auxpass', 'case', 'cc', 'ccomp', 'compound',
-    'conj', 'cop', 'csubj', 'csubjpass', 'dep', 'det',
-    'discourse', 'dislocated', 'dobj', 'expl', 'foreign', 'goeswith', 'iobj',
-    'list', 'mark', 'mwe', 'name', 'neg', 'nmod',
-    'nsubj', 'nsubjpass', 'nummod', 'parataxis', 'punct',
-    'remnant', 'reparandum', 'root', 'vocative', 'xcomp' ]
+#UDEP = [ 'acl', 'advcl', 'advmod', 'amod', 'appos', 'aux',
+#    'auxpass', 'case', 'cc', 'ccomp', 'compound',
+#    'conj', 'cop', 'csubj', 'csubjpass', 'dep', 'det',
+#    'discourse', 'dislocated', 'dobj', 'expl', 'foreign', 'goeswith', 'iobj',
+#    'list', 'mark', 'mwe', 'name', 'neg', 'nmod',
+#    'nsubj', 'nsubjpass', 'nummod', 'parataxis', 'punct',
+#    'remnant', 'reparandum', 'root', 'vocative', 'xcomp' ]
+
+# ordered by frequency in en-ud-train.conllu
+UDEP = [
+       'punct', 'nmod', 'case', 'nsubj', 'det', 'root', 'dobj', 'compound',
+       'advmod', 'amod', 'conj', 'mark', 'cc', 'aux', 'cop', 'advcl', 'acl',
+       'xcomp', 'nummod', 'ccomp', 'neg', 'appos', 'parataxis', 'auxpass',
+       'name', 'nsubjpass', 'discourse', 'expl', 'mwe', 'list', 'iobj',
+       'csubj', 'goeswith', 'vocative', 'remnant', 'reparandum', 'dep',
+       'csubjpass', 'foreign', 'dislocated'
+        ]
 
 class Evaluation:
     total = 0
@@ -171,10 +187,7 @@ pred.close()
 
 # OUTPUT
 if args.joined:
-    if args.errorshare:
-        print(evaluation_all.get_named(args.measure))
-    else:
-        print(evaluation_all.get_named_error_count(args.measure))
+    print(evaluation_all.get_named(args.measure))
 else:
     if args.deprelfactored:
         labels = UDEP
