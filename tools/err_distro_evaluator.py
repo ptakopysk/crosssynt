@@ -121,19 +121,20 @@ else:
 for label in labels:
     denominator = 0
     for label2 in labels:
-        for lang in langcodes:
+        for langcode in langcodes:
             freq = results[langcode][label][label2];
             summed[label][label2] += freq
             denominator += freq
-    for label2 in labels:
-        summed[label][label2] /= denominator
+    if denominator > 0:
+        for label2 in labels:
+            summed[label][label2] /= denominator
 
 
 # OUTPUT
 for label in labels:
     output = [label]
-    for label2 in sorted(summed[label], key=summed[label].get):
+    for label2 in sorted(summed[label], key=summed[label].get, reverse=True):
         output.append(label2)
         output.append(str(summed[label][label2]))
-    print('\ŧ'.join(output))
+    print('\t'.join(output))
 
