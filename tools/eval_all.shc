@@ -98,6 +98,13 @@ function EVAL() {
     
 }
 
+for m in pos head deprel las
+do
+    EVAL --joined --measure $m > $evaldir/joined-$m.tsv
+done
+
+exit 1
+
 for g in predicted gold
 do
     for d in posfactored deprelfactored

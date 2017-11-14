@@ -40,7 +40,8 @@ args = parser.parse_args()
 #UPOS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET', 'INTJ', 'NOUN', 'NUM',
 #    'PART', 'PRON', 'PROPN', 'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X' ]
 
-# ordered by frequency in en-ud-train.conllu
+# ordered by frequency in en-ud-train.conllu, except for PUNCT which is not
+# interesting and therefore pushed down
 UPOS = [
        'NOUN', 'VERB', 'PRON', 'ADP', 'DET', 'PROPN', 'ADJ', 'ADV',
        'AUX','PUNCT', 'CONJ', 'PART', 'NUM', 'SCONJ', 'X', 'INTJ', 'SYM'
