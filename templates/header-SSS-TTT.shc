@@ -175,6 +175,32 @@ outdelextlt=outputs/$s-$t.delex.tlt.dev.conllu
 outsupdelextlt=outputs/$s-$t.sup-delex.tlt.dev.conllu
 outsuptlt=outputs/$s-$t.sup-w2v.tlt.dev.conllu
 
+function setupname() {
+    echo $s-$t.transmoses-w2v-xtag.$1
+}
+
+function modelname() {
+    SETUP=`setupname $1`
+    echo models/$SETUP.udpipe
+}
+
+function outputname() {
+    SETUP=`setupname $1`
+    echo outputs/$SETUP.dev.conllu
+}
+
+function eval_xtag() {
+    NAME=$1
+    MODEL=`modelname $NAME`
+    OUTPUT=`outputname $NAME`
+    echo "Evaluation of the MOSES CROSS-lingual parser in $MODEL, xtag"
+    cat $tgtdtest | \
+        $udpipe --tag --parse $MODEL \
+        > $OUTPUT
+    cat $tgtdtest | \
+        $udpipe --accuracy --tag --parse $MODEL
+}
+
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.
 # Do NOT change the END_HEADER line!!!

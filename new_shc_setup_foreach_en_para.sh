@@ -11,7 +11,7 @@ then
     echo
     echo "Language pairs used: "
     cd ..
-    cat LANG_PAIRS
+    cat langs_para
     echo
 else
     s=$1
