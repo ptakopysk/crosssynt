@@ -10,17 +10,30 @@ with open(fcol1) as col1, open(fcol2) as col2, open(fcol3) as col3, open(freorde
         scol1 = list()
         scol2 = list()
         scol3 = list()
-        # +1 for empty line -- TODO may be missing at file end!!!
-        for i in range(len(links)+1):
+        i2o = dict()
+        o2i = dict()
+        for i in range(len(links)):
+            # indices: source-target (I-O)
+            (indexI, indexO) = links[i].split('-'); # TODO convert to number
+            i2o[indexI] = indexO
+            o2i[indexO] = indexI
             scol1.append(col1.readline().rstrip())
             scol2.append(col2.readline().rstrip())
             scol3.append(col3.readline().rstrip())
-        for i in range(len(links)):
-            # TODO is this the correct order?!?!?!
-            (indexI, indexO) = links[i].split('-'); # TODO convert to number
-            print(scol1[indexI], end='\t')
+        # +1 for empty line -- TODO may be missing at file end!!!
+        scol1.append(col1.readline().rstrip())
+        scol2.append(col2.readline().rstrip())
+        scol3.append(col3.readline().rstrip())
+        for indexO in range(len(col2)-1):
+            # TODO fix token number and parent number
+            indexI = o2i[indexO]
+            tcol1 = scol1[indexI].split('\t');
+            tcol1[0] = indexO+1
+            print(*tcol1, sep='\t', end='\t')
             print(scol2[indexO], end='\t')
-            print(scol3[indexI], end='\n')
+            tcol3 = scol3[indexI].split('\t');
+            tcol3[2] = i2o[tcol3[2])
+            print(*tcol3, sep='\t', end='\t')
         print()
 
 
