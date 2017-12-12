@@ -16,10 +16,11 @@ with open(fcol1) as col1, open(fcol2) as col2, open(fcol3) as col3, open(freorde
             scol2.append(col2.readline().rstrip())
             scol3.append(col3.readline().rstrip())
         for i in range(len(links)):
-            index = # TODO!!!
-            print(scol1[index], end='\t')
-            print(scol2[i],     end='\t')
-            print(scol3[index], end='\n')
+            # TODO is this the correct order?!?!?!
+            (indexI, indexO) = links[i].split('-'); # TODO convert to number
+            print(scol1[indexI], end='\t')
+            print(scol2[indexO], end='\t')
+            print(scol3[indexI], end='\n')
         print()
 
 
