@@ -2,6 +2,8 @@
 #$ -l h_vmem=15g
 #$ -l mem_free=15g
 
+# TODO delete multitokens
+
 cat $srctrain | grep -v '^#'|cut -f1 > $srctransmoses.reorder.col1
 cat $srctrain | grep -v '^#'|cut -f3- > $srctransmoses.reorder.col3-
 
@@ -14,6 +16,6 @@ cat $srctrain | grep -v '^#'|cut -f2 | tr "\n" " "| sed 's/  /\n/g' | \
     perl -n -CS -e 'print ucfirst' | \
     tr " " "\n" > $srctransmoses.reorder.col2
 
-tools/reordering_paste.py $srctransmoses.reorder.col1 $srctransmoses.reorder.col2 $srctransmoses.reorder.col3- $srctransmoses.reorder.alignment | sed 's/^\t\t$//' > $srctransmoses.reorder
+tools/reordering_paste.py $srctransmoses.reorder.col1 $srctransmoses.reorder.col2 $srctransmoses.reorder.col3- $srctransmoses.reorder.alignment > $srctransmoses.reorder
 rm $srctransmoses.reorder.col1 $srctransmoses.reorder.col2 $srctransmoses.reorder.col3-
 

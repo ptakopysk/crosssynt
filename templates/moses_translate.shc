@@ -2,6 +2,8 @@
 #$ -l h_vmem=15g
 #$ -l mem_free=15g
 
+# TODO delete multitokens
+
 cat $srctrain | grep -v '^#'|cut -f1 > $srctransmoses.col1
 cat $srctrain | grep -v '^#'|cut -f3- > $srctransmoses.col3-
 
