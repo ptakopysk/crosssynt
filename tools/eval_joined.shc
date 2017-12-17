@@ -55,7 +55,7 @@ function EVALLANG() {
     ECHOT $l
 
     # LAS
-    for s in tlt_BASE tlt_VERBAUX tlt_NOUNPROPN tlt_PRONDET tlt_NMODCOMPOUND
+    for s in tlt_REORDER
     do
         ECHOT $(tools/evaluator.py --joined -m las `GOLD $l` `OUTX $l $s`)
     done
@@ -93,5 +93,5 @@ function EVAL() {
     EVALen
 }
 
-EVAL > $evaldir/eval_new_experiments_las_joined.tsv
+EVAL > $evaldir/eval_new_experiments_reorder_las_joined.tsv
 
