@@ -104,7 +104,9 @@ mtranstag=models/$s-$t.trans-$f-w2v.tagsrc.udpipe
 mtransxtag=models/$s-$t.trans-$f-w2v.xtagsrc.udpipe
 
 # base and upper models
-mdelex=models/$s-$t.delex-$f.trainonpred.udpipe
+# mdelex=models/$s-$t.delex-$f.trainonpred.udpipe
+# delex is the same for each src
+mdelex=models/$s.delex.trainonpred.udpipe
 msrclex=models/$s-$t.srclex-$f-w2v.trainonpred.udpipe
 msup=models/$s-$t.sup-$f-w2v.trainonpred.udpipe
 
