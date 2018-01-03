@@ -17,7 +17,7 @@ else
     s=$1
     while read l
     do
-        eval ./new_shc_setup.sh $1 en $l
-    done < langs_para
+        eval ./new_shc_setup.sh $1 $l en
+    done < langs_src
 fi
 
