@@ -78,6 +78,7 @@ srctrain=treebanks/$s-ud-train.conllu
 tgttrain=treebanks/$t-ud-train.conllu # only for taggers and upper-bound
 srctrans=treebanks/$s-$t-ud-train.trans.conllu
 tgtdtest=treebanks/$t-ud-dev.conllu
+tgttest=treebanks/$t-ud-test.conllu
 
 # para data
 # monolingual subparts:
@@ -108,6 +109,7 @@ mtransxtag=models/$s-$t.trans-$f-w2v.xtagsrc.udpipe
 # delex is the same for each src
 # mdelex=models/$s.delex.trainonpred.udpipe
 mdelex=models/$s.delex.trainongold.udpipe
+mdelexsimpledeprel=models/$s.delex.trainongold.simpledeprel.udpipe
 msrclex=models/$s-$t.srclex-$f-w2v.trainonpred.udpipe
 msup=models/$s-$t.sup-$f-w2v.trainonpred.udpipe
 
