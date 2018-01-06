@@ -30,7 +30,7 @@ short2long = {
     "hu": "hun",
     "id": "ind",
     "it": "ita",
-    "ja": "jpn",
+    "ja": "jpn",  # no Delta
     "kk": "kaz",
     "la": "lat",
     "lv": "lav",
@@ -50,7 +50,7 @@ short2long = {
     "ug": "uig",  # no W2C, in Opus: Ubuntu Gnome Tanzil
     "uk": "ukr",
     "vi": "vie",
-    "zh": "zho",
+    "zh": "zho",  # no Delta
 }
 
 long2short = dict()

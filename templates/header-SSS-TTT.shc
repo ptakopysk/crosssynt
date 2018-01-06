@@ -17,8 +17,8 @@
 # Do not merge stderr with stdout
 #$ -j n
 #
-# run in troja
-#$ -q troja-all.q
+# run in troja or ms (but not gpu)
+#$ -q '(troja*|ms*)'
 #
 # be hard
 #$ -hard
@@ -90,7 +90,7 @@ tgttest=treebanks/$t-ud-test.conllu
 # -align (dir with aligned data)
 # .align (joined aligned data)
 # .pickle (translation table)
-p=para/OpenSubtitles2016.$s-$t
+p=para/OpenSubtitles2018.$s-$t
 psrc=$p.$s
 ptgt=$p.$t
 
@@ -168,9 +168,11 @@ mdelex_monotrans_pos=models/$s-$t.delex-monotrans-pos.udpipe
 msrctlt=models/$s-$t.$s-tagger.tlt.udpipe
 mtgttlt=models/$s-$t.$t-tagger.tlt.udpipe
 mtransmosestlt=models/$s-$t.transmoses-w2v.tlt.udpipe
+mtransmosestltsd=models/$s-$t.transmoses-w2v-sd.tlt.udpipe
 mtransmosesxtagtlt=models/$s-$t.transmoses-w2v-xtag.tlt.udpipe
 mtransmosesxtagdelextlt=models/$s-$t.transmoses-delex-xtag.tlt.udpipe
 mdelextlt=models/$s-$t.delex.tlt.udpipe
+mdelextltsd=models/$s-$t.delex-sd.tlt.udpipe
 msupdelextlt=models/$s-$t.sup-delex.tlt.udpipe
 msuptlt=models/$s-$t.sup-w2v.tlt.udpipe
 outtransmosestlt=outputs/$s-$t.transmoses-w2v.tlt.dev.conllu
