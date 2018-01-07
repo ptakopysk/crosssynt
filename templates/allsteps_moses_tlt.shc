@@ -1,3 +1,11 @@
+if [ -e $psrc ]
+then
+    echo PARA_EXISTS
+else
+    echo PARA_NOT_EXISTS
+    exit 1
+fi
+
 generate treextok
 generate tgttagger_tlt
 generate srctagger_tlt
