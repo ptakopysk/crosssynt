@@ -137,6 +137,26 @@ mtransmgamosestag=models/$s-$t.mga-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgantmosestag=models/$s-$t.mgant-transmoses-$f-w2v.tagsrc.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
+# If data too small, use a lower N; train should always be much larger than dev and test
+# if data < 100 000: N=1000
+# if data <  10 000: N= 100
+# if data <   1 000: N=  10
+if [ -s $p.$s.tok ]
+then
+    pstokwcl=$(wc -l < $p.$s.tok)
+    if   [ $pstokwcl -lt   1000 ]
+    then
+        N=10
+    elif [ $pstokwcl -lt  10000 ]
+    then
+        N=100
+    elif [ $pstokwcl -lt 100000 ]
+    then
+        N=1000
+    else
+        N=10000
+    fi
+fi    
 
 srcdev=treebanks/$s-ud-dev.conllu
 srcdevtransmoses=treebanks/$s-$t-ud-dev.transmoses.conllu
