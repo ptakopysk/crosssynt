@@ -20,7 +20,7 @@ short2long = {
     "fa": "fas",
     "fi": "fin",
     "fr": "fra",
-    "ga": "gle",
+    "ga": "gle",  # in Opus: leccos ale ne OpenSubtitles
     "gl": "glg",
     "got": "got",  # no W2C, no Opus
     "grc": "grc",  # no W2C, in Opus: Ubuntu
@@ -32,7 +32,7 @@ short2long = {
     "it": "ita",
     "ja": "jpn",  # no Delta
     "kk": "kaz",
-    "la": "lat",
+    "la": "lat",  # in Opus: Ubuntu Gnome Tatoeba
     "lv": "lav",
     "nl": "nld",
     "no": "nor",
