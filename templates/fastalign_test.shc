@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# !!! Memory limit
+#$ -hard
+#$ -l mem_free=5g
+#$ -l act_mem_free=5g
+#$ -l h_vmem=5g
+#
+# 1 thread
+#$ -pe smp 1
+
+D=/net/data/watchtower/parallel_sentences_en_pivot_pairs_nonempty
+
+sed 's/\t/ ||| /' $D/$s-$t.als > fastwork/$s-$t.als.fa
+
+./fastalign    -d -o -v -i fastwork/$s-$t.als.fa > fastwork/$s-$t.fwd
+./fastalign -r -d -o -v -i fastwork/$s-$t.als.fa > fastwork/$s-$t.rev
+./atools -i fastwork/$s-$t.fwd -j fastwork/$s-$t.rev -c grow-diag-final-and > fastwork/$s-$t.gdfa
+rm fastwork/$s-$t.als.fa fastwork/$s-$t.fwd fastwork/$s-$t.rev
+
