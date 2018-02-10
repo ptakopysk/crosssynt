@@ -1,0 +1,41 @@
+
+note: pro underres jazyk nemam jak trénovat tokenizer, takže se tokenizovat
+bude naivně; u zdrojovýho jazyka můžu tokenizovat chytře tak to ještě zvážim
+ale zatim to budu taky dělat naivně (TODO to musim prozkoumat a udělat dobře)
+- tgt jazyky maj NSA jen 3
+- src jazyky maj NSA jen 7
+
+natrénovat vše pro src langs (i tgt langs pro porovnání)
+- jednak sup=fakt dobrej sup tagger a parser (abych byl při projekci co
+  nejlepší) -- bez w2v pač wtc je malá
+- jednak delex jen na UPOS tagách -- pro transfer
+- pokud MT tak pak tgt w2v atd, pokud Bible tak w2c k ničemu
+
+otagovat src větu, bible-like projekce na target
+- vážit přes alignment weight?
+- vážit přes nějakou jinou podobnost?
+- eval: train tagger, eval on TB; also: eval tagging vs tagging by sup tagger
+
+alternativa/jediná pro jazyky bez WTC
+- na všech src natrénovat Deltatagger
+- otagovat
+- eval: eval Delta on TB; train tagger, eval on TB; also: eval tagging vs tagging by sup tagger
+
+KLcpos3
+další věci ala Željko
+- WALS -- hamming loss, anebo edit distance, pro GPS případně euclid distance nebo tak něco:
+  pokud to nebude hamming loss tak pro daný políčko všechny vyvážit na (0,1),
+  tak aby každý políčko mělo stejnou váhu;
+  případně subselektovat jen nějaký syntakticko-sémantický fíčury
+- langid -- možná předtim prohnat skrz unidecode
+- ještě něco?
+- přivážit velikostí treebanku? x log(tbsize)?
+- eval: delex single-src relatively to oracle (% of oracle LAS)
+
+cross-lingual parsing
+- delex (oracle/klsrc/unweighted all/kl-weighted all)
+- ala Bible
+  - možná tgt->src align (raděj to pro tagging, co pro parsing?)
+  - možná union (pak bych neměl díry)
+
+
