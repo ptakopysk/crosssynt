@@ -12,3 +12,7 @@ do
     ln -s $f
 done
 
+# no forms
+rm ja_ktc*
+rm en_esl*
+

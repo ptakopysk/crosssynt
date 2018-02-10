@@ -3,7 +3,7 @@
 #$ -l mem_free=5g
 
 cat $srctrain | \
-    $udpipe --tag $msrcf | \
+    $udpipe --tag $msup | \
     $udpipe --train --tokenizer=none --tagger=none \
     --parser='embedding_form=0' \
     $mdelex

@@ -58,9 +58,11 @@ treexp="treex -p --survive --cleanup --queue troja-all.q -m 5G -j 10"
 # tagger setup
 if [ $s = cs ]
 then
-    taggeropts="use_xpostag=0;provide_xpostag=0;guesser_suffix_rules=3;guesser_enrich_dictionary=2"
+    taggeropts_full="use_xpostag=0;provide_xpostag=0;guesser_suffix_rules=3;guesser_enrich_dictionary=2"
+    taggeropts="use_xpostag=0;provide_xpostag=0;use_feats=0;provide_feats=3;use_lemma=0;provide_lemma=0;guesser_suffix_rules=6;guesser_enrich_dictionary=2"
 else
-    taggeropts="use_xpostag=0;provide_xpostag=0;guesser_suffix_rules=6;guesser_enrich_dictionary=4"
+    taggeropts_full="use_xpostag=0;provide_xpostag=0;guesser_suffix_rules=6;guesser_enrich_dictionary=4"
+    taggeropts="use_xpostag=0;provide_xpostag=0;use_feats=0;provide_feats=0;use_lemma=0;provide_lemma=0;guesser_suffix_rules=6;guesser_enrich_dictionary=4"
 fi
 # remaining default: 1 model, lemmas, upos, feats
 
@@ -108,10 +110,9 @@ mtransxtag=models/$s-$t.trans-$f-w2v.xtagsrc.udpipe
 # mdelex=models/$s-$t.delex-$f.trainonpred.udpipe
 # delex is the same for each src
 # mdelex=models/$s.delex.trainonpred.udpipe
-mdelex=models/$s.delex.trainongold.udpipe
-mdelexsimpledeprel=models/$s.delex.trainongold.simpledeprel.udpipe
+mdelex=models/$s.delex.udpipe
 msrclex=models/$s-$t.srclex-$f-w2v.trainonpred.udpipe
-msup=models/$s-$t.sup-$f-w2v.trainonpred.udpipe
+msup=models/$s.sup.udpipe
 
 # MOSES
 # tokenizer
