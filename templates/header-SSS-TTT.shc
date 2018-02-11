@@ -96,6 +96,10 @@ p=para/OpenSubtitles2018.$s-$t
 psrc=$p.$s
 ptgt=$p.$t
 
+wtc=watchtower/parallel_sentences_en_pivot
+wtcsrc=$wtc/$s.s
+wtctgt=$wtc/$t.s
+
 # final model
 # tag: trained together with a tagger (i.e. on predicted POS),
 # can be used in two ways:

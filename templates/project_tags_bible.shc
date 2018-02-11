@@ -1,0 +1,20 @@
+# Memory limit
+#$ -l h_vmem=1g
+#$ -l mem_free=1g
+
+mkdir -p wtc_projected_upos
+
+function sources() {
+    before=$1
+    after=$2
+    for src in `cat langs_src`
+    do
+        echo -n "$before$src$after "
+    done
+}
+
+for TYPE in fwd rev gdfa
+do
+    tools/project_tags_bible.py $wtctgt $(sources wtc_upos/ .upos.padded) $(sources fastwork/ -$t.$TYPE.padded) > wtc_projected_upos/$t.$TYPE.upos
+done
+
