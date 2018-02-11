@@ -8,6 +8,8 @@ ale zatim to budu taky dělat naivně (TODO to musim prozkoumat a udělat dobře
 natrénovat vše pro src langs (i tgt langs pro porovnání)
 - jednak sup=fakt dobrej sup tagger a parser (abych byl při projekci co
   nejlepší) -- bez w2v pač wtc je malá
+  - TODO možná w2v na concat of TB and wtc
+  - TODO eval (hlavně kvůli x-tag eval)
 - jednak delex jen na UPOS tagách -- pro transfer
 - pokud MT tak pak tgt w2v atd, pokud Bible tak w2c k ničemu
 
@@ -15,6 +17,8 @@ otagovat src větu, bible-like projekce na target
 - vážit přes alignment weight?
 - vážit přes nějakou jinou podobnost?
 - eval: train tagger, eval on TB; also: eval tagging vs tagging by sup tagger
+- XXX HERE I AM NOW -- ted se trénujou taggery a mam je evaluovat na zlatejch test
+  datech, a taky evaluovat supervised tagegry a to porovnat
 
 alternativa/jediná pro jazyky bez WTC
 - na všech src natrénovat Deltatagger

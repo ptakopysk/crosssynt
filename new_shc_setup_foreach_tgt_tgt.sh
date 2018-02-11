@@ -11,11 +11,10 @@ then
     echo
     echo "Language pairs used: "
     cd ..
-    cat langs_para
+    cat langs_tgt
     echo
 else
-    s=$1
-    while read s
+    while read t
     do
         eval ./new_shc_setup.sh $1 $t $t
     done < langs_tgt
