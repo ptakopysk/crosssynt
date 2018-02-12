@@ -99,6 +99,10 @@ ptgt=$p.$t
 wtc=watchtower/parallel_sentences_en_pivot
 wtcsrc=$wtc/$s.s
 wtctgt=$wtc/$t.s
+wtcmono=watchtower/sentences
+wtcmonosrc=$wtcmono/$s.s
+wtcmonotgt=$wtcmono/$t.s
+wtct=wtc_processed/true
 
 # final model
 # tag: trained together with a tagger (i.e. on predicted POS),
@@ -130,6 +134,7 @@ srctransmoses=treebanks/$s-$t-ud-train.transmoses.conllu
 srctransmamoses=treebanks/$s-$t-ud-train.monoalign-transmoses.conllu
 srctransmgamoses=treebanks/$s-$t-ud-train.mga-transmoses.conllu
 srctransmgantmoses=treebanks/$s-$t-ud-train.mgant-transmoses.conllu
+srctransmoseswtc=treebanks/$s-$t-ud-train.transmoseswtc.conllu
 mosesdir=moseswork/$s-$t/
 mamosesdir=moseswork_monoalign/$s-$t/
 mgamosesdir=moseswork_mga/$s-$t/
@@ -140,6 +145,7 @@ mtransmosesxtag=models/$s-$t.transmoses-$f-w2v.xtagsrc.udpipe
 mtransmamosestag=models/$s-$t.monoalign-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgamosestag=models/$s-$t.mga-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgantmosestag=models/$s-$t.mgant-transmoses-$f-w2v.tagsrc.udpipe
+mtransmoseswtc=models/$s-$t.transmoseswtc.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
 # If data too small, use a lower N; train should always be much larger than dev and test
@@ -162,6 +168,9 @@ then
         N=10000
     fi
 fi    
+
+# N for watchtower
+WN=1000
 
 srcdev=treebanks/$s-ud-dev.conllu
 srcdevtransmoses=treebanks/$s-$t-ud-dev.transmoses.conllu
