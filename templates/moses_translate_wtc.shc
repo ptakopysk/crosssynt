@@ -1,6 +1,6 @@
 # Memory limit
-#$ -l h_vmem=15g
-#$ -l mem_free=15g
+#$ -l h_vmem=3g
+#$ -l mem_free=3g
 
 cat $srctrain | cut -f1 > $srctransmoseswtc.col1
 cat $srctrain | cut -f3- > $srctransmoseswtc.col3-
