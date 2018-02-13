@@ -38,6 +38,16 @@ metody:
 poloviční baselines: delex (včetně src sel -> normálně MST combo), srclex (asi
 včetně unidecode)
 
+
+
+až tohle všechno bude tak ideálně zkusit ještě použít další para data kde
+nemam wtc (bible, udhr) a udělat s tim totéž
+
+
+
+taky ideálně nakonec vydat modely a poseudotreebanky pro jazyky co nejsou v ud
+
+
 === MOSES all sources and all targets ===
 
 - Moses -- ín some lang pairs all is OOV and left untranslated...
