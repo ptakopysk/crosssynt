@@ -1,4 +1,62 @@
 
+vyhodnotit: eval_delex* -- to určí oracle jazyky a bude se podle toho měřit
+úspěšnost src-sel metod
+
+vyhodnotit: eval_tagger_wtcproj-* -- to je úspěšnost bible taggingu
+(zjednodušenýho o vynechání některejch drobností jako alignment strength a
+tak), to je jeden z kandidátů na zdroj tagů pro KL
+
+TODO src sel:
+
+implementovat a pustit a vyhodnotit KL na wtcproj tagách
+
+implemementovat lang-id a vyhodnotit -- asi včetně unidecode
+
+implementovat WALS hamming a vyhodnotit
+
+implementovat a vyhodnotit KL na delta (tak jak je) -- mam to pro všechny UD1.4 jazyky?
+
+(natrénovat delta na src jazykách a opakovat předchozí krok)
+
+-> vybrat nmejlepší src-sel metodu (nebo jednoduchou kombinaci)
+
+
+TODO x-tagging:
+
+vzít jako source jenom 1/3/n nejpodobnější jazyky (váženě), x-tag
+(bible / Moses / Delta budeli)
+
+
+TODO x-parsing:
+
+zapojit src sel (1-src/m-src -- base=all sources with weight === 1)
+
+metody:
+- Moses
+- Bible-proj
+
+poloviční baselines: delex (včetně src sel -> normálně MST combo), srclex (asi
+včetně unidecode)
+
+=== MOSES all sources and all targets ===
+
+- Moses -- ín some lang pairs all is OOV and left untranslated...
+--- Mgiza dies, not sure why, some problem somewhere.....
+...conclusion: trioning 300 pairs of Moseses, even on small data, is
+infeasible even on a medium-sized cluster
+(main bottleneck seems to be that Moses works too extensively with the disk)
+
+TODO: aspon nějakej eval na těch parserech který se zdaj bejt OK -- naměřit
+míru OOV na "přeloženejch" treebancích, a ty kde je to uvěřitelný tak tam
+evaluovat na nich natrénovaný taggery a parsery
+
+závěr: nejdřív vybrat podobný zdrojový jazyky nějak jinak,
+třeba 3, a pak jen pro ty natrénovat Mosese
+(to co se trénovalo jen 1x pro scr nebo pro tgt, jako lm nebo true, tak to
+nebyl problém)
+
+=====
+
 note: pro underres jazyk nemam jak trénovat tokenizer, takže se tokenizovat
 bude naivně; u zdrojovýho jazyka můžu tokenizovat chytře tak to ještě zvážim
 ale zatim to budu taky dělat naivně (TODO to musim prozkoumat a udělat dobře)
