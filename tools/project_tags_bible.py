@@ -3,6 +3,7 @@
 
 import sys
 from collections import defaultdict, Counter
+import math
 
 DEFAULT_TAG = 'NOUN'
 
@@ -40,12 +41,18 @@ for line in tgt_fh:
         else:
             assert src_pos != '\n', "all aligned lines must have POS tags"
             src_pos = src_pos.split()
-            alignment = alignment.split()
-            for link in alignment:
+            alignments = alignment.split()
+            al_score = 1
+            if alignment.count('\t'):
+                # last two elements are forward and backward alignment score
+                al_score = math.exp(
+                        float(alignments.pop()) +
+                        float(alignments.pop()))
+            for link in alignments:
                 i_src, i_tgt = [int(i) for i in link.split('-')]
                 pos = src_pos[i_src]
-                tags[-1][i_tgt][pos] += 1
-                word_tags[words[-1][i_tgt]][pos] += 1
+                tags[-1][i_tgt][pos] += al_score
+                word_tags[words[-1][i_tgt]][pos] += al_score
 
 for line in range(len(words)):
     line_words = words[line]
