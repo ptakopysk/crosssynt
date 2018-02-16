@@ -1,17 +1,9 @@
 # Memory limit
-#$ -l h_vmem=8g
-#$ -l mem_free=8g
+#$ -l h_vmem=3g
+#$ -l mem_free=3g
 
-for TYPE in fwd rev gdfa
-do
-for RUN in udpipe udpipe.run2
-do
-    if [ -e models/$t.tagger.wtcproj.$TYPE.$RUN     ]
-    then
-    echo $t.tagger.wtcproj.$TYPE.$RUN
-    cat $tgtdtest | \
-        $udpipe --tag --accuracy \
-        models/$t.tagger.wtcproj.$TYPE.$RUN
-    fi
-done
-done
+echo -ne "$t.tagger.wtcproj.int.udpipe\t"
+cat $tgtdtest | \
+    $udpipe --tag --accuracy \
+    models/$t.tagger.wtcproj.int.udpipe | \
+    grep -o 'upostag: [0-9.]*'| cut -d' ' -f2

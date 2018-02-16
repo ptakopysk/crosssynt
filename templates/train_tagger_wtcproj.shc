@@ -1,11 +1,8 @@
 # Memory limit
-#$ -l h_vmem=8g
-#$ -l mem_free=8g
+#$ -l h_vmem=10g
+#$ -l mem_free=10g
 
-for TYPE in fwd rev gdfa
-do
-    cat wtc_projected_upos/$t.$TYPE.conllu | \
-        $udpipe --train --tokenizer=none --parser=none \
-        --tagger=$taggeropts \
-        models/$t.tagger.wtcproj.$TYPE.udpipe
-done
+cat wtc_projected_upos/$t.int.conllu | \
+    $udpipe --train --tokenizer=none --parser=none \
+    --tagger=$taggeropts \
+    models/$t.tagger.wtcproj.int.udpipe
