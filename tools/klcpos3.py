@@ -10,6 +10,8 @@ from collections import deque, defaultdict
 # i.e. we approximate P by Q
 # projection from lang1 to lang2
 
+# usage: python3 klcpos3.py source.conllu target.conllu
+
 N = 3
 END = 'BOUNDARY'
 SMOOTH = 0.5
