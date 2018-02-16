@@ -32,7 +32,7 @@ def readfile(filename):
         line = line.strip()
         if line:
             ngram.popleft()
-            order, word, tag = line.split('\t')[:3]
+            tag = line.split('\t')[3]
             ngram.append(tag)
             result[tuple(ngram)] += 1
         else:
