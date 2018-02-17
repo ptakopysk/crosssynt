@@ -5,7 +5,7 @@
 D=wtc_processed/true
 M=models/$s-wtc.lm
 
-mosesdecoder/bin/lmplz -T /COMP.TMP/lm -S 29G -o 3 < $D.train.$s > $M
+mosesdecoder/bin/lmplz -T /COMP.TMP/lm -S 25G -o 3 < $D.train.$s > $M
 
 mosesdecoder/bin/build_binary $M $M.bin
 
