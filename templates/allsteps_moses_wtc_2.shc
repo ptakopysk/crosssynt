@@ -3,7 +3,7 @@ generate moses_train_wtc
 generate moses_tune_wtc
 generate moses_translate_wtc
 generate parser_transmoses_wtc
-generate eval_moses
+generate eval_param
 
 SS=$s-$s.shc
 TT=$t-$t.shc
