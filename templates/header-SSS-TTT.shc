@@ -242,6 +242,14 @@ function eval_xtag() {
         $udpipe --accuracy --tag --parse $MODEL
 }
 
+function iso2wals() {
+    grep '^'$1$'\t' langs_wals|cut -f2
+}
+
+function wals2iso() {
+    grep $'\t'$1'$' langs_wals|cut -f1
+}
+
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.
 # Do NOT change the END_HEADER line!!!
