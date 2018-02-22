@@ -146,6 +146,7 @@ mtransmamosestag=models/$s-$t.monoalign-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgamosestag=models/$s-$t.mga-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgantmosestag=models/$s-$t.mgant-transmoses-$f-w2v.tagsrc.udpipe
 mtransmoseswtc=models/$s-$t.transmoseswtc.udpipe
+moptransmoseswtc=models/$s-$t.transmoseswtc.onlyparser.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
 # If data too small, use a lower N; train should always be much larger than dev and test
