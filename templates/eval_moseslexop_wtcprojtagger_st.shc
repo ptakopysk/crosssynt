@@ -1,0 +1,9 @@
+# Memory limit
+#$ -l h_vmem=3g
+#$ -l mem_free=3g
+
+cat $tgtdtest | \
+    $udpipe --tag models/$t.tagger.wtcproj.int.udpipe | \
+    $udpipe --parse --accuracy $moptransmoseswtc | \
+    grep -o 'LAS: [0-9.]*'| cut -d' ' -f2
+
