@@ -11,14 +11,17 @@ DEFAULT_TAG = 'NOUN'
 # 1: 1x tgt text
 #    Nx src UPOS
 #    Nx src-tgt alignment
+#  +-Nx src weight
 
 # parameters
 tgt_f = sys.argv[1]
-N = (len(sys.argv)-2)/2
-assert N == int(N), "must have odd number of arguments"
+arg_groups = 3 if sys.argv[0].endswith('weighted.py') else 2
+N = (len(sys.argv)-2)/arg_groups
+assert N == int(N), "must have matching number of arguments"
 N = int(N)
 src_pos_f = sys.argv[2:N+2]
-alignment_f = sys.argv[N+2:]
+alignment_f = sys.argv[N+2:2*N+2]
+src_weights = [float(w) for w in sys.argv[2*N+2:]]  # empty if arg_groups=2
 
 # open files
 tgt_fh = open(tgt_f)
@@ -43,9 +46,11 @@ for line in tgt_fh:
             src_pos = src_pos.split()
             alignments = alignment.split()
             al_score = 1
+            if src_weights:
+                al_score = src_weights[src]
             if alignment.count('\t'):
                 # last two elements are forward and backward alignment score
-                al_score = math.exp(
+                al_score *= math.exp(
                         float(alignments.pop()) +
                         float(alignments.pop()))
             for link in alignments:
