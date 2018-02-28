@@ -3,7 +3,7 @@
 
 # similarity of src lang to the given tgt lang
 
-# input: wals_file.tsv tgt_lang_wals_code
+# input: wals_file.tsv tgt_lang_wals_code src_lang_wals_code+
 
 # ouput: similarity between 0 and 1 for each src lang
 

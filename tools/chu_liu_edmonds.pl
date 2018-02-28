@@ -16,27 +16,28 @@ while (<>) {
     chomp;
     my @input = split / /;
     my $N = shift @input;
+    # parent child weight parent child weight ...
     my @edges = @input;
-    print "N=";
-    print($N);
-    print "\n";
+    #print "N=";
+    #print($N);
+    #print "\n";
 
 
     my $graph = Graph::Directed->new(vertices=>[(1 .. $N)]);
     $graph->add_weighted_edges(@edges);
     foreach my $edge ($graph->edges) {
-        print $edge->[0];
-        print " ";
-        print $edge->[1];
-        print "\n";
+        #print $edge->[0];
+        #print " ";
+        #print $edge->[1];
+        #print "\n";
     }
     my $msts = $graph->MST_ChuLiuEdmonds($graph);
-    print "MST: \n";
+    #print "MST: \n";
     foreach my $edge ($msts->edges) {
         print $edge->[0];  # parent
-        print " ";
+        print "-";
         print $edge->[1];  # child
-        print "\n";
+        print " ";
     }
     print "\n";
 }
