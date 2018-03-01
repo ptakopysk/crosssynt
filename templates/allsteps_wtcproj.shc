@@ -12,19 +12,19 @@ cd run/
 # qsub wtc_conllu-$S
 
 # foreach s, t
-# fastwork/$s-$t.* -> fastwork/$s-$t.int -> fastwork/$s-$t.int.padded
+# fastwork/$s-$t.* -> fastwork/$s-$t.intersect -> fastwork/$s-$t.intersect.padded
 # qsub fastalign_wtc-$S
 
 # foreach t
 # project the tags
-# wtc_upos/$s.upos.padded fastwork/$s-$t.int.padded -> wtc_projected_upos/$t.int.upos
-# -> wtc_projected_upos/$t.int.conllu
+# wtc_upos/$s.upos.padded fastwork/$s-$t.intersect.padded -> wtc_projected_upos/$t.intersect.upos
+# -> wtc_projected_upos/$t.intersect.conllu
 qsub -hold_jid fastalign_wtc-'*'-$t.shc \
     project_tags_bible-$S
 
 # foreach t
 # train tagger
-# wtc_projected_upos/$t.int.conllu -> models/$t.tagger.wtcproj.int.udpipe
+# wtc_projected_upos/$t.intersect.conllu -> models/$t.tagger.wtcproj.intersect.udpipe
 qsub -hold_jid project_tags_bible-$S \
     train_tagger_wtcproj-$S
 

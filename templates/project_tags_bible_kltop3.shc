@@ -13,6 +13,6 @@ function sources() {
     done
 }
 
-tools/project_tags_bible.py $wtctgt $(sources wtc_upos/ .upos.padded) $(sources fastwork/ -$t.int.padded) > wtc_projected_upos/$t.int.kltop3.upos
-tools/sentences2conllu.py $wtctgt _ wtc_projected_upos/$t.int.kltop3.upos _ _ _ _ _ _ > wtc_projected_upos/$t.int.kltop3.conllu
+tools/project_tags_bible.py $wtctgt $(sources wtc_upos/ .upos.padded) $(sources fastwork/ -$t.intersect.padded) > wtc_projected_upos/$t.intersect.kltop3.upos
+tools/sentences2conllu.py $wtctgt _ wtc_projected_upos/$t.intersect.kltop3.upos _ _ _ _ _ _ > wtc_projected_upos/$t.intersect.kltop3.conllu
 

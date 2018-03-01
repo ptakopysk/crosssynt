@@ -15,7 +15,7 @@ do
     # echo $l
     MODEL=$(l2m $m)
     cat $tgtdtest | \
-        $udpipe --tag models/$t.tagger.wtcproj.int.udpipe | \
+        $udpipe --tag models/$t.tagger.wtcproj.intersect.udpipe | \
         $udpipe --parse --accuracy $MODEL | \
         grep -o 'LAS: [0-9.]*'| cut -d' ' -f2
 done | tr "\n" "\t"

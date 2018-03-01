@@ -10,12 +10,12 @@ ORACLE=$(head -n 1 delex_uas_las/$t.las | cut -f1)
 KLBEST=$(head -n 1 invklcpos3/$t.srctb_tgtwtc_intersect | cut -f1)
 WALSBEST=$(head -n 1 walssim/$t.iso | cut -f1)
 
-for l in $t $ORACLE $KLBEST $WALSBEST
+for l in $ORACLE $KLBEST $t $WALSBEST
 do
     echo $l
     MODEL=$(l2m $l)
     cat $tgtdtest | \
-        $udpipe --tag models/$t.tagger.wtcproj.int.udpipe | \
+        $udpipe --tag models/$t.tagger.wtcproj.intersect.udpipe | \
         $udpipe --parse --accuracy $MODEL | \
         grep -o 'LAS: [0-9.]*'| cut -d' ' -f2
 done | tr "\n" "\t"

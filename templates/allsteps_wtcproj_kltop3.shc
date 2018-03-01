@@ -12,25 +12,25 @@ cd run/
 # qsub wtc_conllu-$S
 
 # foreach s, t
-# fastwork/$s-$t.* -> fastwork/$s-$t.int -> fastwork/$s-$t.int.padded
+# fastwork/$s-$t.* -> fastwork/$s-$t.intersect -> fastwork/$s-$t.intersect.padded
 # qsub fastalign_wtc-$S
 
 # foreach t
 # project the tags
-# wtc_upos/$s.upos.padded fastwork/$s-$t.int.padded -> wtc_projected_upos/$t.int.upos
-# -> wtc_projected_upos/$t.int.conllu
+# wtc_upos/$s.upos.padded fastwork/$s-$t.intersect.padded -> wtc_projected_upos/$t.intersect.upos
+# -> wtc_projected_upos/$t.intersect.conllu
 qsub -hold_jid fastalign_wtc-'*'-$t.shc \
     project_tags_bible_kltop3-$S
 
 # foreach t
 # train tagger
-# wtc_projected_upos/$t.int.conllu -> models/$t.tagger.wtcproj.int.udpipe
+# wtc_projected_upos/$t.intersect.conllu -> models/$t.tagger.wtcproj.intersect.udpipe
 qsub -hold_jid project_tags_bible_kltop3-$S \
     train_tagger_wtcproj_kltop3-$S
 
 # foreach t
 qsub -hold_jid train_tagger_wtcproj_kltop3-$S \
-    -N eval_tagger_param-wtcproj.int.kltop3-$S \
-    eval_tagger_param-$S $t.tagger.wtcproj.int.kltop3.udpipe
+    -N eval_tagger_param-wtcproj.intersect.kltop3-$S \
+    eval_tagger_param-$S $t.tagger.wtcproj.intersect.kltop3.udpipe
 
 
