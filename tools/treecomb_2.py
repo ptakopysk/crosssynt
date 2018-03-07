@@ -11,9 +11,9 @@ def mst2dict(mst):
         d[child] = parent
     return d
 
-with open(sys.argv[1]) as mst:
-    parent = mst2dict(mst.readline())
-    for line in sys.stdin:
+with open(sys.argv[1]) as conllu:
+    parent = mst2dict(sys.stdin.readline())
+    for line in conllu:
         line = line.strip()
         if line.startswith('#'):
             # comment
@@ -22,7 +22,7 @@ with open(sys.argv[1]) as mst:
             # end of sentence
             print()
             # new tree for next sentence
-            parent = mst2dict(mst.readline())
+            parent = mst2dict(sys.stdin.readline())
         else:
             fields = line.split('\t')
             child = fields[0]

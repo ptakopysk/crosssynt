@@ -22,6 +22,9 @@ parser.add_argument("-c", "--correlation",
 parser.add_argument("--wo",
     help="weight the oracle by relative las",
     action="store_true")
+parser.add_argument("-s", "--simple",
+    help="second param is just 1 lang code",
+    action="store_true")
 args = parser.parse_args()
 
 lang2las = dict()
@@ -48,6 +51,11 @@ if args.wo:
             denominator += weight
         weighted_oracle_las = nominator/denominator
 
+if args.simple:
+    lang = args.predictedfile
+    result = lang2las[lang]/weighted_oracle_las
+    print(result)
+    sys.exit()
 
 with open(args.predictedfile) as predictedfh:
     if args.correlation:
