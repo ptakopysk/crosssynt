@@ -5,7 +5,6 @@ generate moses_translate_wtc
 generate parser_transmoses_wtc
 generate parseronly_transmoses_wtc
 generate eval_param
-generate eval_moseslexop_wtcprojtagger_st
 
 SS=$s-$s.shc
 TT=$t-$t.shc
