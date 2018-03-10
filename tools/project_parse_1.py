@@ -8,7 +8,7 @@ import math
 # TODO labelled
 
 DEFAULT_PARENT = '0'
-DEFAULT_PARENT_WEIGHT = 0.00001
+DEFAULT_PARENT_WEIGHT = -0.0000001
 
 # 0
 # 1: 1x tgt text

@@ -259,6 +259,10 @@ function l2m() {
     echo models/$1.udpipe
 }
 
+function l2o () {
+    echo outputs/$t.TAG.$1.PARSE.$2.conllu
+}
+
 function klbest() {
     n=$1
     head -n $n invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f1
