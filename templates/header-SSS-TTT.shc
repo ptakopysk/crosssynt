@@ -273,6 +273,14 @@ function iklbest() {
     head -n $n invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f2
 }
 
+function ikltop() {
+    n=$1
+    for i in $(seq $n)
+    do
+        iklbest $i
+    done
+}
+
 ### END_HEADER ###
 # Everything till the END_HEADER line will be copied to the generated subscripts.
 # Do NOT change the END_HEADER line!!!
