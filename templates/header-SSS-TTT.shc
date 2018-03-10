@@ -145,8 +145,11 @@ mtransmosesxtag=models/$s-$t.transmoses-$f-w2v.xtagsrc.udpipe
 mtransmamosestag=models/$s-$t.monoalign-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgamosestag=models/$s-$t.mga-transmoses-$f-w2v.tagsrc.udpipe
 mtransmgantmosestag=models/$s-$t.mgant-transmoses-$f-w2v.tagsrc.udpipe
+# tagger and parser trained on moses-translated tb
 mtransmoseswtc=models/$s-$t.transmoseswtc.udpipe
+# parser trained on moses-translated treebank on src-gold tags
 moptransmoseswtc=models/$s-$t.transmoseswtc.onlyparser.udpipe
+# parser trained on moses-translated treebank on wtcproj tags
 mopwptransmoseswtc=models/$s-$t.transmoseswtc.onlyparser.wtcprojtags.udpipe
 # first N = dev, last N = test, middle = train
 N=10000
@@ -250,6 +253,20 @@ function iso2wals() {
 
 function wals2iso() {
     grep $'\t'$1'$' langs_wals|cut -f1
+}
+
+function l2m() {
+    echo models/$1.udpipe
+}
+
+function klbest() {
+    n=$1
+    head -n $n invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f1
+}
+
+function iklbest() {
+    n=$1
+    head -n $n invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f2
 }
 
 ### END_HEADER ###
