@@ -5,14 +5,9 @@ import sys
 from collections import defaultdict, Counter
 import math
 
-# TODO labelled
-
-DEFAULT_PARENT = '0'
-DEFAULT_PARENT_WEIGHT = -0.0000001
-
 # 0
 # 1: 1x tgt text
-#    Nx src parse
+#    Nx src parse: sequence of parent ords
 #    Nx src-tgt alignment
 #  +-Nx src weight
 
@@ -39,52 +34,46 @@ def align2dict(align):
     d = defaultdict(list)
     for st in align.split():
         (src, tgt) = st.split('-')
+        # alignment is 0-based but ords are 1-based
+        src = int(src)+1
+        tgt = int(tgt)+1
         d[src].append(tgt)
+    # root is always aligned to root
+    d[0] = [0]
     return d
 
-
+sent_len = list()
+sent_pc_weight = list()
 with open(tgt_f) as tgt_fh:
-    sent_len = [len(line.split()) for line in tgt_fh]
-
-
-sent_pc_weight = defaultdict(lambda: defaultdict(int))
+    for line in tgt_fh:
+        sent_len.append(len(line.split()))
+        sent_pc_weight.append(defaultdict(int))
+SENTS = len(sent_len)
 
 for src in range(N):
-    sent = 0
     with open(alignment_f[src]) as alignment_fh, open(
             src_parse_f[src]) as src_parse_fh:
-        src2tgt = align2dict(alignment_fh.readline())
-        for line in src_parse_fh:
-            line = line.strip()
-            if line.startswith('#'):
-                # comment
-                pass
-            elif not line:
-                # end of sentence
-                sent += 1
-                src2tgt = align2dict(alignment_fh[src].readline())
-            else:
-                fields = line.split('\t')
-                parent = fields[6]
-                child = fields[0]
-                if parent in src2tgt and child in src2tgt:
-                    for tgt_parent in src2tgt[parent]:
-                        for tgt_child in src2tgt[child]:
-                            # - because MST computes MINIMUM spanning tree
-                            sent_pc_weight[sent][(tgt_parent, tgt_child)] -= src_weights[i]
-                            # TODO times alignment score
+        sent = -1
+        for line, alignment in zip(src_parse_fh, alignment_fh):
+            sent += 1
+            src2tgt = align2dict(alignment)
+            parents = [int(p) for p in line.split()]
+            children = range(1, len(parents)+1)
+            for parent, child in zip(parents, children):
+                for tgt_parent in src2tgt[parent]:
+                    for tgt_child in src2tgt[child]:
+                        # - because MST computes MINIMUM spanning tree
+                        sent_pc_weight[sent][(tgt_parent, tgt_child)] -= src_weights[src]
+            
 
 # add child->root edge for each child
-for sent in sent_pc_weight:
+for sent in range(SENTS):
     for child in range(1, sent_len[sent]+1):
-        sent_pc_weight[sent][(DEFAULT_PARENT, child)] += DEFAULT_PARENT_WEIGHT
+        sent_pc_weight[sent][(0, child)] += 0
 
 
-for sent in sent_pc_weight:
-    print (sent_len[sent], *[" ".join([
-        parent,
-        child,
-        str(sent_pc_weight[sent][(parent, child)])
-        ])
-            for (parent, child) in sent_pc_weight[sent]])
+for sent in range(SENTS):
+    print (sent_len[sent], *[" ".join((
+        str(parent), str(child), str(sent_pc_weight[sent][(parent, child)]) ))
+        for (parent, child) in sent_pc_weight[sent]])
 

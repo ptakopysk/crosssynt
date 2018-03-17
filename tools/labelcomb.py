@@ -19,6 +19,10 @@ if arg_groups == 1:
 else:
     weights = [float(w) for w in sys.argv[N+2:2*N+2]]
 
+# iterate in reverse order so that "fields" get remembered from the first input
+inputs.reverse()
+weights.reverse()
+
 end_of_file = 0
 while not end_of_file:
     # read in the next line from each file

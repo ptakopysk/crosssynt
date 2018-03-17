@@ -2,13 +2,8 @@
 #$ -l h_vmem=3g
 #$ -l mem_free=3g
 
-m_TAG=$t.tagger.wtcproj.intersect
+MTAGGER=$1
+MPARSER=$2
 
-M=$1
-
-function l2o () {
-    echo outputs/$t.TAG.$1.PARSE.$2.conllu
-}
-
-tools/evaluator.py -j -m las $tgtdtest $(l2o $m_TAG $M)
+tools/evaluator.py -j -m las $tgtdtest $(l2o $MTAGGER $MPARSER)
 

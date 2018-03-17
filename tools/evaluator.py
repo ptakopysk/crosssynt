@@ -35,6 +35,9 @@ parser.add_argument("-e", "--errorshare",
 parser.add_argument("-j", "--joined",
     help="joined nonfactored eval",
     action="store_true")
+parser.add_argument("-c", "--columns",
+    help="print header listing the column labels first",
+    action="store_true")
 args = parser.parse_args()
 
 #UPOS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET', 'INTJ', 'NOUN', 'NUM',
@@ -210,5 +213,7 @@ else:
         else:
             output = [str(evaluation_pred[label].get_named(args.measure))
                     for label in labels]
+    if args.columns:
+        print('\t'.join(labels))
     print('\t'.join(output))
 

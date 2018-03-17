@@ -2,8 +2,6 @@
 #$ -l h_vmem=5g
 #$ -l mem_free=5g
 
-mkdir -p wtc_projected_upos
-
 function sources() {
     before=$1
     after=$2
@@ -13,35 +11,24 @@ function sources() {
     done
 }
 
-tools/project_tags_bible.py $wtctgt $(sources wtc_upos/ .upos.padded) > wtc_projected_upos/$t.intersect.upos
-tools/sentences2conllu.py $wtctgt _ wtc_projected_upos/$t.intersect.upos _ _ _ _ _ _ > wtc_projected_upos/$t.intersect.conllu
+# project tags -- already done
 
-# Memory limit
-#$ -l h_vmem=3g
-#$ -l mem_free=3g
-
-function l2m() {
-    echo models/$1.udpipe
-}
-
-# these are parsers trained on gold src tags
-# (this seems to give best results on average)
-
-KL1BEST=$(head -n 1 invklcpos3/$t.srctb_tgtwtc_intersect | cut -f1)-$t.transmoseswtc.onlyparser
-KL2BEST=$(head -n 2 invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f1)-$t.transmoseswtc.onlyparser
-KL3BEST=$(head -n 3 invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f1)-$t.transmoseswtc.onlyparser
-
-m_TAG=$t.tagger.wtcproj.intersect
-
-function l2o () {
-    echo outputs/$t.TAG.$1.PARSE.$2.conllu
-}
-
-tools/project_parse_1.py \
-    CONLLU_FILES \
+# project trees
+tools/project_parse_1.py $wtctgt \
+    $(sources wtc_parse/ .heads.padded) \
     $(sources fastwork/ -$t.intersect.padded) | \
-tools/chu_liu_edmonds.pl | \
-tools/treecomb_2.py \
-    $(l2o $m_TAG $KL1BEST) \
-> $(l2o $m_TAG project_parse.all.unweighted)
+    tools/chu_liu_edmonds_simple.pl \
+> wtc_parse/$t.heads.projected.padded
+
+# project deprels
+tools/project_tags_bible.py $wtctgt \
+    $(sources wtc_parse/ .deprels.padded) \
+    $(sources fastwork/ -$t.intersect.padded) \
+> wtc_parse/$t.deprels.projected.padded
+
+# combine
+tools/sentences2conllu.py \
+    $wtctgt _ wtc_projected_upos/$t.intersect.upos _ _ \
+    wtc_parse/$t.heads.projected.padded wtc_parse/$t.deprels.projected.padded _ _ \
+    > wtc_parse/$t.projected.conllu
 

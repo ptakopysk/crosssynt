@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 #coding: utf-8
 
+# projects tags or deprels
+
 import sys
 from collections import defaultdict, Counter
 import math
@@ -31,6 +33,7 @@ alignment_fh = [open(filename) for filename in alignment_f]
 words = list()
 tags = list()
 word_tags = defaultdict(Counter)
+all_tags = Counter()
 for line in tgt_fh:
     words.append(line.split())
     length = len(words[-1])
@@ -58,6 +61,9 @@ for line in tgt_fh:
                 pos = src_pos[i_src]
                 tags[-1][i_tgt][pos] += al_score
                 word_tags[words[-1][i_tgt]][pos] += al_score
+                all_tags[pos] += al_score
+
+DEFAULT_TAG = all_tags.most_common(1)[0][0]
 
 for line in range(len(words)):
     line_words = words[line]
