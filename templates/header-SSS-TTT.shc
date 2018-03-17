@@ -255,6 +255,14 @@ cat $tgtdtest | \
     grep -o 'upostag: [0-9.]*'| cut -d' ' -f2
 }
 
+function eval_parser() {
+cat $tgtdtest | \
+    $udpipe --tag --parse --accuracy \
+    models/$1.udpipe | \
+    grep computed | \
+    grep -o 'LAS: [0-9.]*'| cut -d' ' -f2
+}
+
 
 function iso2wals() {
     grep '^'$1$'\t' langs_wals|cut -f2
