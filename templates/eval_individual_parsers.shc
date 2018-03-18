@@ -1,0 +1,13 @@
+# Memory limit
+#$ -l h_vmem=3g
+#$ -l mem_free=3g
+
+n=7
+
+MTAGGER=$t.tagger.top7klbest.transmoseswtc.iklweighted.wtcdata
+MPARSER=transmoseswtc.onlyparser
+
+for s in $(kltop $n)
+do
+    eval_withtagger_parser $MTAGGER $s-$t.$MPARSER
+done | tr "\n" "\t"
