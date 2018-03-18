@@ -1,0 +1,34 @@
+# Memory limit
+#$ -l h_vmem=5g
+#$ -l mem_free=5g
+
+function sources() {
+    before=$1
+    after=$2
+    for src in `cat langs_src`
+    do
+        echo -n "$before$src$after "
+    done
+}
+
+# project tags -- already done
+
+# project trees
+tools/project_parse_1.py $wtctgt \
+    $(sources wtc_parse/ .heads.padded) \
+    $(sources fastwork/ -$t.rev.padded) | \
+    tools/chu_liu_edmonds_simple.pl \
+> wtc_parse/$t.heads.projected-revalign.padded
+
+# project deprels
+tools/project_tags_bible.py $wtctgt \
+    $(sources wtc_parse/ .deprels.padded) \
+    $(sources fastwork/ -$t.rev.padded) \
+> wtc_parse/$t.deprels.projected-revalign.padded
+
+# combine
+tools/sentences2conllu.py \
+    $wtctgt _ wtc_projected_upos/$t.rev.upos _ _ \
+    wtc_parse/$t.heads.projected-revalign.padded wtc_parse/$t.deprels.projected-revalign.padded _ _ \
+    > wtc_parse/$t.projected-revalign.conllu
+
