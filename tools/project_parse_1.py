@@ -43,11 +43,14 @@ def align2dict(align):
     return d
 
 sent_len = list()
+# sent_pc_weight[sent_id][child_id][parent_id] = score
+# includes index 0, this is to be skipped (children 1-based)
 sent_pc_weight = list()
 with open(tgt_f) as tgt_fh:
     for line in tgt_fh:
-        sent_len.append(len(line.split()))
-        sent_pc_weight.append(defaultdict(int))
+        slen = len(line.split())
+        sent_len.append(slen)
+        sent_pc_weight.append([defaultdict(int) for child in range(slen+1)])
 SENTS = len(sent_len)
 
 for src in range(N):
@@ -62,18 +65,23 @@ for src in range(N):
             for parent, child in zip(parents, children):
                 for tgt_parent in src2tgt[parent]:
                     for tgt_child in src2tgt[child]:
-                        # - because MST computes MINIMUM spanning tree
-                        sent_pc_weight[sent][(tgt_parent, tgt_child)] -= src_weights[src]
+                        sent_pc_weight[sent][tgt_child][tgt_parent] += src_weights[src]
             
 
-# add child->root edge for each child
 for sent in range(SENTS):
-    for child in range(1, sent_len[sent]+1):
-        sent_pc_weight[sent][(0, child)] += 0
+    slen = sent_len[sent]
+    print(slen, end=' ')
+    for child in range(1, slen+1):
+        # add root
+        sent_pc_weight[sent][child][0] += 0
+        # logits
+        for parent in sent_pc_weight[sent][child]:
+            sent_pc_weight[sent][child][parent] = math.exp(sent_pc_weight[sent][child][parent])
+        # normalize and invert (because MST is Minimum spanning tree)
+        Z = sum(sent_pc_weight[sent][child].values())
+        for parent in sent_pc_weight[sent][child]:
+            sent_pc_weight[sent][child][parent] /= -Z
+            print(parent, child, sent_pc_weight[sent][child][parent], end=' ')
+    print()
 
-
-for sent in range(SENTS):
-    print (sent_len[sent], *[" ".join((
-        str(parent), str(child), str(sent_pc_weight[sent][(parent, child)]) ))
-        for (parent, child) in sent_pc_weight[sent]])
 

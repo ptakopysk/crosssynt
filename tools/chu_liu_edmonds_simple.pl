@@ -14,7 +14,7 @@ if ( @ARGV != 0 ) {
 
 while (<>) {
     chomp;
-    my @input = split / /;
+    my @input = split;
     if (@input) {
         my $N = shift @input;
         # parent child weight parent child weight ...
