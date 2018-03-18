@@ -7,6 +7,14 @@ n=$1
 MTAGGER=$t.tagger.top7klbest.transmoseswtc.iklweighted.wtcdata
 MPARSER=transmoseswtc.onlyparser
 
+function halfikltop() {
+    n=$1
+    for ikl in $(head -n $n $R/invklcpos3/$t.srctb_tgtwtc_intersect | cut -f2)
+    do
+        echo "scale=6; $ikl/2" | bc
+    done
+}
+
 function sources() {
     for s in $(kltop $n)
     do
@@ -19,7 +27,7 @@ function sources() {
 }
 
 
-tools/treecomb_1_weighted.py $(sources) $(ikltop $n) $(ikltop $n) | \
+tools/treecomb_1_weighted.py $(sources) $(ikltop $n) $(halfikltop $n) | \
     tools/chu_liu_edmonds.pl | \
     tools/treecomb_2.py $(l2o $MTAGGER $(klbest 1)-$t.$MPARSER) \
     > $(l2o $MTAGGER top$n.$MPARSER.ANDdelex)
@@ -40,7 +48,7 @@ function sources2() {
     done
 }
 
-tools/labelcomb_weighted.py 8 $(sources2 $n) $(ikltop $n) $(ikltop $n) \
+tools/labelcomb_weighted.py 8 $(sources2 $n) $(ikltop $n) $(halfikltop $n) \
     > $(l2o $MTAGGER top$n.$MPARSER.ANDdelex.deprelvoted)
 
 
