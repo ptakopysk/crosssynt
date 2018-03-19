@@ -12,6 +12,5 @@ cat $(l2o $t.tagger.top7klbest.transmoseswtc.iklweighted.wtcdata top5.transmoses
 cat $tgtdtest | \
     $udpipe --tag $(l2m $t.tagger.top7klbest.transmoseswtc.iklweighted.wtcdata) | \
     $udpipe --accuracy --parse $(l2m $t.onlyparser.transmoseswtc.wtop7tag.wtop5parse.wtcdata) | \
-    grep computed | \
     grep -o 'LAS: [0-9.]*'| cut -d' ' -f2
 
