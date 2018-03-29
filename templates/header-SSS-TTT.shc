@@ -292,6 +292,10 @@ function klbest() {
     head -n $n $R/invklcpos3/$t.srctb_tgtwtc_intersect | tail -n 1 | cut -f1
 }
 
+function oracle() {
+    grep $t $R/pairs_oracle | cut -f1
+}
+
 function kltop() {
     n=$1
     head -n $n $R/invklcpos3/$t.srctb_tgtwtc_intersect | cut -f1
