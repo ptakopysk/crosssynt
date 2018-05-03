@@ -22,7 +22,7 @@ qsub -N eval_tool-$MTAGGER-oracle-$(oracle)-$t.$MPARSER-$S \
     eval_tool_param-$S $MTAGGER $(oracle)-$t.$MPARSER
 
 # for n in $(seq 3 7)
-for n in 5 22
+for n in 5 21
 do
     qsub -N treecomb_weighted-$MTAGGER-$MPARSER-top$n-$S \
             treecomb_weighted_param_tagger_parser_n-$S $MTAGGER $MPARSER $n
